@@ -437,13 +437,22 @@ function editItem(id, name, price, category, ingredients, image) {
     // Show existing image
     var preview = document.getElementById("imagePreview");
 
-    if (image && image !== "") {
-        preview.src = image;
+if (image && image.trim() !== "") {
+    preview.onload = function () {
         preview.style.display = "block";
-    }
-    else {
+    };
+
+    preview.onerror = function () {
         preview.style.display = "none";
-    }
+        alert("The saved image could not be loaded. The image file may be missing from the website.");
+    };
+
+    preview.src = image;
+    preview.style.display = "block";
+} else {
+    preview.removeAttribute("src");
+    preview.style.display = "none";
+}
 
     window.scrollTo({
         top: 0,
