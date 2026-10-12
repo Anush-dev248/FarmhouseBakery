@@ -6,3 +6,4 @@ obj/
 appsettings.Development.json
 farmhousebakery.db
 farmhousebakery-backup.db
+secrets.json
