@@ -1,0 +1,383 @@
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Login - Farmhouse Bakery</title>
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #000;
+            min-height: 100vh;
+        }
+
+        /* HEADER */
+
+        .login_header {
+            height: 80px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            padding: 0 50px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .brand img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+            margin-right: 12px;
+        }
+
+        /* LOGIN AREA */
+
+        .login_section {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            background: #f5f5f5;
+        }
+
+        .login_box {
+            width: 100%;
+            max-width: 430px;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .login_logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .login_logo img {
+            width: 75px;
+            height: 75px;
+            object-fit: contain;
+        }
+
+        .login_box h2 {
+            text-align: center;
+            color: #222;
+            font-size: 30px;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+
+        .login_subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* INPUT */
+
+        .input_group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input_group i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+            font-size: 16px;
+            z-index: 2;
+        }
+
+        .input_group input {
+            display: block;
+            width: 100%;
+            height: 52px;
+
+            border: 1px solid #d5d5d5;
+            border-radius: 6px;
+
+            background: #ffffff;
+
+            padding: 0 15px 0 45px;
+
+            font-size: 15px;
+            color: #333;
+
+            outline: none;
+        }
+
+        .input_group input:focus {
+            border-color: #ffbe33;
+            box-shadow: 0 0 0 2px rgba(255, 190, 51, 0.15);
+        }
+
+        .input_group input::placeholder {
+            color: #999;
+        }
+
+        /* OPTIONS */
+
+        .login_options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            margin-top: 5px;
+            margin-bottom: 25px;
+
+            font-size: 13px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #555;
+        }
+
+        .remember input {
+            width: 15px;
+            height: 15px;
+        }
+
+        .forgot_link {
+            color: #d89500;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .forgot_link:hover {
+            color: #ffbe33;
+        }
+
+        /* LOGIN BUTTON */
+
+        .login_btn {
+            display: block;
+            width: 100%;
+            height: 52px;
+
+            border: none;
+            border-radius: 6px;
+
+            background: #ffbe33;
+            color: #ffffff;
+
+            font-size: 17px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+        .login_btn:hover {
+            background: #e5a500;
+        }
+
+        /* BACK HOME */
+
+        .back_home {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .back_home a {
+            color: #777;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back_home a:hover {
+            color: #d89500;
+        }
+
+        /* MOBILE */
+
+        @@media (max-width: 576px) {
+
+            .login_header {
+                padding: 0 20px;
+            }
+
+            .brand {
+                font-size: 18px;
+            }
+
+            .login_box {
+                padding: 30px 22px;
+            }
+
+            .login_box h2 {
+                font-size: 26px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+
+    <header class="login_header">
+
+        <a href="/" class="brand">
+
+            <img src="/images/LogoBLKbg.png"
+                 alt="Farmhouse Bakery">
+
+            <span>Farmhouse Bakery</span>
+
+        </a>
+
+    </header>
+
+
+    <!-- LOGIN -->
+
+    <section class="login_section">
+
+        <div class="login_box">
+
+            <div class="login_logo">
+
+                <img src="/images/LogoBLKbg.png"
+                     alt="Farmhouse Bakery">
+
+            </div>
+
+            <h2>Welcome Back</h2>
+
+            <p class="login_subtitle">
+                Login to Farmhouse Bakery
+            </p>
+
+
+            <form asp-controller="Account"
+      asp-action="Login"
+      method="post">
+
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All"
+         style="color: red; margin-bottom: 15px;">
+    </div>
+
+                <!-- EMAIL -->
+
+                <div class="input_group">
+
+                    <i class="fa fa-envelope"></i>
+
+                    <input type="email"
+                           id="email"
+                           name="email"
+                           placeholder="Email Address"
+                           required />
+
+                </div>
+
+
+                <!-- PASSWORD -->
+
+                <div class="input_group">
+
+                    <i class="fa fa-lock"></i>
+
+                    <input type="password"
+                           id="password"
+                           name="password"
+                           placeholder="Password"
+                           required />
+
+                </div>
+
+
+                <!-- OPTIONS -->
+
+                <div class="login_options">
+
+                    <label class="remember">
+
+                        <input type="checkbox"
+                               id="remember" />
+
+                        <span>Remember me</span>
+
+                    </label>
+
+                    <a href="/Account/ForgotPassword"
+                       class="forgot_link">
+                        Forgot Password?
+                    </a>
+
+                </div>
+
+
+                <!-- BUTTON -->
+
+                <button type="submit"
+                        class="login_btn">
+
+                    Login
+
+                </button>
+
+            </form>
+
+
+            <!-- BACK -->
+
+            <div class="back_home">
+
+                <a href="/">
+                    ← Back to Home
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <script>
+
+        
+
+    </script>
+
+</body>
+
+</html>

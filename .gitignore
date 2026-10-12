@@ -1,0 +1,8 @@
+
+bin/
+obj/
+.vs/
+.vscode/
+appsettings.Development.json
+farmhousebakery.db
+farmhousebakery-backup.db

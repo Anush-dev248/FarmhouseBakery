@@ -1,0 +1,192 @@
+@model FarmhouseBakery.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Register - Farmhouse Bakery</title>
+
+    <link rel="stylesheet" href="~/css/bakeryscript.css" />
+    <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/css/responsive.css" />
+
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .register-container {
+            min-height: 85vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 15px;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 450px;
+            background: #222;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .register-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .register-logo img {
+            width: 75px;
+            margin-bottom: 10px;
+        }
+
+        .register-logo h2 {
+            color: #ffbe33;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .register-logo p {
+            color: #ccc;
+        }
+
+        .register-card label {
+            display: block;
+            margin-bottom: 7px;
+            color: white;
+        }
+
+        .register-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #555;
+            border-radius: 6px;
+            background: #fff;
+            color: #222;
+        }
+
+        .register-card input:focus {
+            outline: 2px solid #ffbe33;
+            border-color: #ffbe33;
+        }
+
+        .register-button {
+            width: 100%;
+            padding: 12px;
+            background: #ffbe33;
+            color: #222;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .register-button:hover {
+            background: #e69c00;
+        }
+
+        .login-text {
+            text-align: center;
+            margin-top: 22px;
+            color: #ccc;
+        }
+
+        .login-text a {
+            color: #ffbe33;
+            text-decoration: none;
+        }
+
+        .login-text a:hover {
+            text-decoration: underline;
+        }
+
+        .text-danger {
+            color: #ff7777 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-container">
+        <div class="register-card">
+
+            <div class="register-logo">
+                <img src="~/images/LogoBLKbg.png"
+                     alt="Farmhouse Bakery Logo" />
+
+                <h2>Create Account</h2>
+                <p>Welcome to Farmhouse Bakery</p>
+            </div>
+
+            <form asp-controller="Account"
+                  asp-action="Register"
+                  method="post">
+
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="All"
+                     class="text-danger"></div>
+
+                <label asp-for="Email">Email Address</label>
+                <input asp-for="Email"
+                       type="email"
+                       placeholder="Enter your email"
+                       required />
+                <span asp-validation-for="Email"
+                      class="text-danger"></span>
+
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password"
+                       type="password"
+                       placeholder="Create a password"
+                       required />
+                <span asp-validation-for="Password"
+                      class="text-danger"></span>
+
+                <label asp-for="ConfirmPassword">
+                    Confirm Password
+                </label>
+                <input asp-for="ConfirmPassword"
+                       type="password"
+                       placeholder="Confirm your password"
+                       required />
+                <span asp-validation-for="ConfirmPassword"
+                      class="text-danger"></span>
+
+                <button type="submit" class="register-button">
+                    Register
+                </button>
+
+                <p class="login-text">
+                    Already have an account?
+                    <a asp-controller="Account"
+                    asp-action="Login">Login</a>
+                </p>
+
+                <p class="login-text">
+                    <a asp-controller="Home"
+                    asp-action="AdminIndex">
+                        ← Back to Admin Dashboard
+                    </a>
+                </p>
+
+            </form>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>

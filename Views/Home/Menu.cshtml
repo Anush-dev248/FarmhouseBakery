@@ -1,0 +1,194 @@
+@model IEnumerable<FarmhouseBakery.Models.MenuItem>
+
+@{
+    ViewData["Title"] = "Our Menu";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Our Menu - Farmhouse Bakery</title>
+
+    <link rel="stylesheet" href="~/css/bakeryscript.css" />
+    <link rel="stylesheet" href="~/css/style.css" />
+    <link rel="stylesheet" href="~/css/responsive.css" />
+</head>
+
+<body>
+
+    <div class="hero_area">
+
+        <div class="bg-box"
+             style="background-color:black; height:100%; display:flex;
+                    justify-content:flex-end; align-items:center;">
+
+            <img src="~/images/a1.png"
+                 alt="Farmhouse Bakery"
+                 style="height:100%; width:58%; object-fit:contain;" />
+        </div>
+
+        <header class="header_section">
+            <div class="container">
+
+                <nav class="navbar navbar-expand-lg custom_nav-container">
+
+                    <a class="navbar-brand" href="/">
+                        <span>
+                            <img src="~/images/LogoBLKbg.png"
+                                 width="50"
+                                 alt="Farmhouse Bakery" />
+                            Farmhouse Bakery
+                        </span>
+                    </a>
+
+                    <button class="navbar-toggler"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#navbarSupportedContent"
+                            aria-controls="navbarSupportedContent"
+                            aria-expanded="false"
+                            aria-label="Toggle navigation">
+                        <span></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse"
+                         id="navbarSupportedContent">
+
+                        <ul class="navbar-nav mx-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="/">Home</a>
+                            </li>
+
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/Home/Menu">Menu</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="/#about">About</a>
+                            </li>
+                        </ul>
+
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <section class="slider_section">
+            <div class="container">
+                <div class="detail-box">
+                    <h1>Our Menu</h1>
+                    <p>Explore all our freshly prepared bakery favourites.</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <section id="menu" class="food_section layout_padding">
+        <div class="container">
+
+            <div class="heading_container heading_center">
+                <h2>All Menu Items</h2>
+            </div>
+
+            <ul class="filters_menu">
+                <li class="active" data-filter="*">All</li>
+                <li data-filter=".bakery">Bakery</li>
+                <li data-filter=".burger">Cold Grab N' Go</li>
+            </ul>
+
+            <div class="filters-content">
+                <div class="row grid">
+
+                    @foreach (var item in Model)
+                    {
+                        string categoryClass = "";
+
+                        if (item.Category == "Bakery")
+                        {
+                            categoryClass = "bakery";
+                        }
+                        else if (item.Category == "Cold Grab N' Go")
+                        {
+                            categoryClass = "burger";
+                        }
+
+                        <div class="col-sm-6 col-lg-4 all @categoryClass">
+                            <div class="box">
+
+                                <div class="img-box">
+                                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                                    {
+                                        <img src="@item.ImageUrl"
+                                             alt="@item.Name" />
+                                    }
+                                    else
+                                    {
+                                        <div style="height:200px; display:flex;
+                                                    align-items:center;
+                                                    justify-content:center;
+                                                    background:#f5f5f5;
+                                                    color:#999;">
+                                            No Image
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="detail-box">
+                                    <h5>@item.Name</h5>
+                                    <p>@item.Ingredients</p>
+
+                                    <div class="options">
+                                        <h6>$@item.Price.ToString("0.00")</h6>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="heading_container heading_center">
+                    <p>No menu items are available yet. Please check back soon!</p>
+                </div>
+            }
+
+            <div class="btn-box text-center" style="margin-top:30px;">
+                <a href="/" class="btn1">Back to Home</a>
+            </div>
+
+        </div>
+    </section>
+
+    <script src="~/js/jquery-3.4.1.min.js"></script>
+    <script src="~/js/bakeryscript.js"></script>
+    <script src="https://unpkg.com/isotope-layout@3.0.4/dist/isotope.pkgd.min.js"></script>
+    <script src="~/js/custom.js"></script>
+
+    <script>
+        $(function () {
+            var $grid = $('.grid').isotope({
+                itemSelector: '.all',
+                layoutMode: 'fitRows'
+            });
+
+            $('.filters_menu li').on('click', function () {
+                $('.filters_menu li').removeClass('active');
+                $(this).addClass('active');
+
+                $grid.isotope({
+                    filter: $(this).attr('data-filter')
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>
