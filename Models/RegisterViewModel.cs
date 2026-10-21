@@ -18,5 +18,8 @@ namespace FarmhouseBakery.Models
         [DataType(DataType.Password)]
         [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        // Only used when an admin creates the account.
+        public bool IsAdmin { get; set; }
     }
 }

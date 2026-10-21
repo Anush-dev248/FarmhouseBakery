@@ -9,26 +9,33 @@ function getYear() {
 
 getYear();
 
-
-// isotope js
+ // isotope js
 $(window).on('load', function () {
-    $('.filters_menu li').click(function () {
-        $('.filters_menu li').removeClass('active');
-        $(this).addClass('active');
+    var $grid = $(".grid").first();
 
-        var data = $(this).attr('data-filter');
-        $grid.isotope({
-            filter: data
-        })
-    });
+    // Do not initialize Isotope on the Home page.
+    // The Home page has its own three-item filter.
+    if (document.getElementById("viewMoreLink")) {
+        return;
+    }
 
-    var $grid = $(".grid").isotope({
+    // Keep Isotope filtering for other pages.
+    var $menuGrid = $grid.isotope({
         itemSelector: ".all",
         percentPosition: false,
         masonry: {
             columnWidth: ".all"
         }
-    })
+    });
+
+    $(".filters_menu li").off("click").on("click", function () {
+        $(".filters_menu li").removeClass("active");
+        $(this).addClass("active");
+
+        $menuGrid.isotope({
+            filter: $(this).attr("data-filter")
+        });
+    });
 });
 
 // nice select

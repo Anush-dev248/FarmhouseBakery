@@ -2,6 +2,7 @@ using FarmhouseBakery.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using FarmhouseBakery.Services;
 
@@ -34,9 +35,17 @@ namespace FarmhouseBakery.Controllers
             return View();
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> Login(
             string email, string password)
         {
@@ -62,7 +71,8 @@ namespace FarmhouseBakery.Controllers
                         return RedirectToAction("AdminIndex", "Home");
                     }
 
-                    return RedirectToAction("Index", "Home");
+                    // Normal users go straight to menu management.
+                    return RedirectToAction("Manage", "Menu");
                 }
 
             ModelState.AddModelError(
@@ -92,6 +102,7 @@ namespace FarmhouseBakery.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
         public async Task<IActionResult> Register(
             RegisterViewModel model)
         {
@@ -136,7 +147,9 @@ namespace FarmhouseBakery.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-                // Additional accounts are not administrators.
+                // Additional accounts are administrators only when the admin ticks the box.
+                if (model.IsAdmin)
+                {
                     var roleResult = await _userManager.AddToRoleAsync(user, "Admin");
 
                     if (!roleResult.Succeeded)
@@ -148,8 +161,9 @@ namespace FarmhouseBakery.Controllers
 
                         return View(model);
                     }
+                }
 
-                    return RedirectToAction("Index", "Home");
+                return RedirectToAction("AdminIndex", "Home");
             }
 
             foreach (var error in result.Errors)
@@ -178,6 +192,7 @@ public IActionResult ForgotPassword()
 [HttpPost]
 [AllowAnonymous]
 [ValidateAntiForgeryToken]
+[EnableRateLimiting("auth")]
 public async Task<IActionResult> ForgotPassword(string email)
 {
     if (string.IsNullOrWhiteSpace(email))
@@ -247,6 +262,7 @@ public IActionResult ResetPassword(string email, string token)
 [HttpPost]
 [AllowAnonymous]
 [ValidateAntiForgeryToken]
+[EnableRateLimiting("auth")]
 public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
 {
     if (!ModelState.IsValid)

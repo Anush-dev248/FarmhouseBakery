@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Farmhouse Bakery";
+    Layout = null; // complete page; does not use _Layout
 }
 
 <!DOCTYPE html>
@@ -13,165 +14,223 @@
 
     <title>Farmhouse Bakery</title>
 
-    <link rel="stylesheet" href="~/css/bakeryscript.css" />
+    <link rel="stylesheet" href="~/css/bakeryscript.css" asp-append-version="true" />
     <!-- Font Awesome disabled -->
-    <!-- <link rel="stylesheet" href="~/css/font-awesome.min.css" /> -->
-    <link rel="stylesheet" href="~/css/style.css" />
-    <link rel="stylesheet" href="~/css/responsive.css" />
+    <!-- <link rel="stylesheet" href="~/css/font-awesome.min.css" asp-append-version="true" /> -->
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
+    <style>
+        /* Keep #menu / #about headings visible below the fixed header */
+        html {
+            scroll-padding-top: 90px;
+        }
+
+        .board_item {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            transition: filter 0.25s ease;
+        }
+
+        .board_item_shape {
+            position: absolute;
+            inset: 0;
+            background: url("/images/heromarket.jpg") center / 100% 100% no-repeat;
+            pointer-events: auto;
+            transition: transform 0.25s ease;
+        }
+
+        .board_item:has(.board_item_shape:hover) {
+            z-index: 5;
+            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.75))
+                    drop-shadow(0 0 12px rgba(255, 214, 140, 0.55));
+        }
+
+        .board_item_shape:hover {
+            transform: scale(1.08);
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            .board_item,
+            .board_item_shape {
+                transition: none;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- HERO -->
-    <div class="hero_area">
+    <!-- HEADER -->
+    <header class="header_section" style="background-color: black; position: sticky; top: 0; z-index: 1000;">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg custom_nav-container">
 
-        <div class="bg-box"
-             style="background-color:black;
-                    height:100%;
-                    display:flex;
-                    justify-content:flex-end;
-                    align-items:center;">
+                <a class="navbar-brand" href="/">
+                    <span>
+                        <img src="~/images/LogoBLKbg.png"
+                             width="50"
+                             alt="Farmhouse Bakery" />
+                        Farmhouse Bakery
+                    </span>
+                </a>
 
-            <img src="~/images/a1.png"
-                 alt="Farmhouse Bakery"
-                 style="height:100%;
-                        width:58%;
-                        object-fit:contain;">
-        </div>
+                <button class="navbar-toggler"
+                        type="button"
+                        data-toggle="collapse"
+                        data-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <span></span>
+                </button>
 
-        <!-- HEADER -->
-        <header class="header_section">
-            <div class="container">
+                <div class="collapse navbar-collapse"
+                     id="navbarSupportedContent">
 
-                <nav class="navbar navbar-expand-lg custom_nav-container">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/Index#menu">Menu</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Home/Index#about">About</a>
+                        </li>
+                    </ul>
 
-                    <a class="navbar-brand" href="/">
-                        <span>
-                            <img src="~/images/LogoBLKbg.png"
-                                 width="50"
-                                 alt="Farmhouse Bakery">
-
-                            Farmhouse Bakery
-                        </span>
-                    </a>
-
-                    <button class="navbar-toggler"
-                            type="button"
-                            data-toggle="collapse"
-                            data-target="#navbarSupportedContent"
-                            aria-controls="navbarSupportedContent"
-                            aria-expanded="false"
-                            aria-label="Toggle navigation">
-
-                        <span></span>
-
-                    </button>
-
-                    <div class="collapse navbar-collapse"
-                         id="navbarSupportedContent">
-
-                        <ul class="navbar-nav mx-auto">
-
-                            <li class="nav-item active">
-                                <a class="nav-link" href="/">
-                                    Home
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Home/Index#menu">
-                                    Menu
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Home/Index#about">
-                                    About
-                                </a>
-                            </li>
-                        </ul>
-
-                        <!-- LOGIN ICON -->
-
-                        <div class="user_option">
-
-                            <a href="/Account/Login" class="user_link" title="Login">
-                                <span class="login-icon">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-       stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="8" r="4"></circle>
-    <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"></path>
-  </svg>
-</span>
+                    <div class="user_option">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <a href="/Menu/Manage" class="order_online" style="margin-right: 12px;">
+                                Manage Menu
                             </a>
+                        }
 
-                        </div>
-
-                    </div>
-
-                </nav>
-
-            </div>
-        </header>
-
-        <!-- HERO SLIDER -->
-
-        <section class="slider_section">
-
-            <div id="customCarousel1"
-                 class="carousel slide"
-                 data-ride="carousel">
-
-                <div class="carousel-inner">
-
-                    <div class="carousel-item active">
-
-                        <div class="container">
-
-                            <div class="row">
-
-                                <div class="col-md-7 col-lg-6">
-
-                                    <div class="detail-box">
-
-                                        <h1>
-                                            Farmhouse Bakery
-                                        </h1>
-
-                                        <p>
-                                            We believe great baking starts with
-                                            quality ingredients and a whole lot
-                                            of passion. Every treat is carefully
-                                            prepared and freshly baked to bring
-                                            a smile to your day.
-                                        </p>
-
-                                        <div class="btn-box">
-
-                                            <a href="#menu"
-                                               class="btn1">
-                                                View
-                                            </a>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
+                        <a href="/Account/Login" class="user_link" title="Login">
+                            <svg width="18" height="18" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round"
+                                 stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="4"></circle>
+                                <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"></path>
+                            </svg>
+                        </a>
                     </div>
 
                 </div>
+            </nav>
+        </div>
+    </header>
+    
+<!-- HERO -->
+<div class="hero_area" style="background: transparent;">
+<!-- HERO IMAGE -->
+<div style="width: 100%;
+            height: calc(100vh - 80px);
+            min-height: 400px;
+            overflow: hidden;
+            background: black;
+            display: flex;
+            align-items: center;
+            justify-content: center;">
 
-            </div>
+    <!-- Box keeps the banner's 1195x896 shape so the logo stays lined up with the lettering -->
+    <div style="position: relative;
+                width: min(100%, calc(max(400px, 100vh - 80px) * 1195 / 896));
+                aspect-ratio: 1195 / 896;">
 
-        </section>
+        <img src="~/images/heromarket.jpg"
+             alt="Farmhouse Bakery &amp; Market"
+             style="display: block;
+                    width: 100%;
+                    height: 100%;">
 
+        <img src="~/images/LogoBLKbg.png"
+             alt="Farmhouse Bakery logo"
+             style="position: absolute;
+                    left: 2.5%;
+                    top: 10.5%;
+                    width: 15.5%;
+                    height: auto;">
+
+        <!-- Hover shapes: each one is the banner clipped to a single item on the board -->
+        <div class="board_item" aria-hidden="true">
+            <!-- Grapes -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(8.79% 50.22%, 10.04% 46.88%, 12.97% 42.97%, 17.57% 38.5%, 22.18% 37.39%, 25.1% 38.5%, 28.03% 36.27%, 28.87% 41.29%, 30.96% 43.53%, 31.8% 47.43%, 30.13% 49.11%, 24.69% 50.22%, 24.27% 53.01%, 20.08% 55.25%, 14.23% 56.36%, 10.04% 57.48%, 8.79% 54.69%);
+                        transform-origin: 20.29% 46.88%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Ham croissant -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(5.86% 61.38%, 7.53% 58.59%, 11.72% 55.8%, 17.57% 54.69%, 22.18% 55.8%, 25.1% 59.71%, 28.03% 64.73%, 30.13% 69.2%, 29.29% 71.99%, 25.94% 73.66%, 20.08% 74.22%, 13.39% 73.1%, 9.21% 70.31%, 6.69% 65.85%);
+                        transform-origin: 17.99% 64.45%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Cheese -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(24.44% 51.9%, 26.78% 49.67%, 32.64% 49.11%, 35.98% 51.9%, 36.4% 57.48%, 41.84% 57.48%, 42.85% 60.27%, 42.68% 65.85%, 42.26% 71.43%, 38.49% 73.66%, 34.31% 73.1%, 30.13% 71.99%, 29.71% 66.96%, 27.62% 64.17%, 24.69% 61.94%);
+                        transform-origin: 33.64% 61.38%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Salami -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(32.22% 47.99%, 35.15% 45.98%, 40.17% 45.76%, 43.51% 46.88%, 46.03% 44.64%, 50.21% 45.2%, 52.3% 47.43%, 51.46% 51.9%, 49.37% 57.48%, 46.86% 60.27%, 43.93% 60.83%, 41.84% 59.15%, 40.17% 57.48%, 36.82% 57.48%, 36.4% 51.9%, 32.64% 50.22%);
+                        transform-origin: 42.26% 52.73%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Baguette -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(48.54% 51.9%, 51.88% 47.99%, 56.07% 44.08%, 60.25% 41.85%, 64.44% 41.52%, 66.53% 43.53%, 66.53% 47.43%, 63.6% 51.34%, 61.09% 55.25%, 58.58% 58.59%, 55.23% 60.83%, 51.88% 61.38%, 48.95% 59.71%, 48.12% 55.8%);
+                        transform-origin: 57.32% 51.45%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Chocolate chip cookie -->
+            <div class="board_item_shape"
+                 style="clip-path: ellipse(7.11% 6.7% at 49.79% 66.41%);
+                        transform-origin: 49.79% 66.41%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Wrap -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(57.32% 61.38%, 58.58% 55.8%, 61.92% 51.34%, 66.11% 47.43%, 69.46% 44.64%, 71.97% 45.2%, 74.48% 47.99%, 74.06% 53.57%, 71.13% 58.04%, 68.62% 62.5%, 67.36% 66.96%, 65.27% 69.2%, 61.92% 69.42%, 59% 68.08%, 57.57% 65.29%);
+                        transform-origin: 65.9% 57.03%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Sandwich -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(74.9% 42.97%, 75.73% 41.52%, 83.26% 41.29%, 90.54% 44.08%, 90.79% 49.11%, 92.05% 51.34%, 91.21% 54.69%, 91.21% 61.38%, 89.54% 64.17%, 85.36% 65.29%, 80.75% 64.17%, 79.92% 60.83%, 78.66% 59.15%, 75.73% 58.59%, 74.48% 55.25%, 75.31% 51.34%, 74.06% 49.11%);
+                        transform-origin: 83.05% 53.29%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Coffee -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(67.78% 63.06%, 68.62% 60.27%, 71.97% 58.93%, 76.99% 58.93%, 79.92% 60.83%, 80.5% 63.62%, 79.5% 66.96%, 78.24% 82.59%, 74.48% 83.37%, 70.29% 82.59%, 68.79% 66.96%, 67.62% 64.73%);
+                        transform-origin: 74.06% 71.15%;"></div>
+        </div>
+
+        <div class="board_item" aria-hidden="true">
+            <!-- Coffee beans -->
+            <div class="board_item_shape"
+                 style="clip-path: polygon(80.75% 69.2%, 83.68% 65.85%, 87.87% 64.96%, 91.63% 66.41%, 94.14% 69.2%, 95.4% 74.78%, 95.4% 79.24%, 97.07% 83.71%, 97.07% 86.5%, 93.72% 87.05%, 88.7% 85.38%, 84.52% 85.38%, 79.5% 83.71%, 78.66% 82.03%, 80.33% 77.57%, 81.17% 72.54%);
+                        transform-origin: 87.87% 76%;"></div>
+        </div>
     </div>
+</div>
+
+</div>
+
+</div>
 
 
     <!-- MENU -->
@@ -205,10 +264,14 @@
                     Cold Grab N' Go
                 </li>
 
+                <li data-filter=".others">
+                    Others
+                </li>
+
             </ul>
 
 
-            <div class="filters-content">
+            <div class="filters-content" id="menuItems">
 
                 <div class="row grid">
 
@@ -216,15 +279,26 @@
         {
             string categoryClass = "";
 
-            if (item.Category == "Bakery")
+            string normalizedCategory = new string(
+                (item.Category ?? "")
+                    .Where(char.IsLetterOrDigit)
+                    .ToArray()
+            ).ToLowerInvariant();
+
+            if (normalizedCategory == "bakery")
             {
                 categoryClass = "bakery";
             }
-            else if (item.Category == "Cold Grab N' Go")
+            else if (normalizedCategory.Contains("grab") &&
+                    normalizedCategory.Contains("go"))
             {
                 categoryClass = "burger";
             }
-
+            else if (normalizedCategory == "others" ||
+                    normalizedCategory == "other")
+            {
+                categoryClass = "others";
+            }
             <div class="col-sm-6 col-lg-4 all @categoryClass">
 
                 <div class="box">
@@ -254,11 +328,11 @@
 
                         <div class="detail-box">
 
-                            <h5>
+                            <h5 title="@item.Name">
                                 @item.Name
                             </h5>
 
-                            <p>
+                            <p title="@item.Ingredients">
                                 @item.Ingredients
                             </p>
 
@@ -287,10 +361,15 @@
         </div>
 
         <div class="btn-box text-center" style="margin: 30px 0;">
-            <a href="/Home/Menu#menu" class="btn1">
-                View More
-            </a>
-        </div>
+    <a href="/Home/Menu?category=all#menu"
+       id="viewMoreLink"
+       class="btn1"
+       role="button"
+       aria-controls="menuItems"
+       aria-expanded="false">
+        View More
+    </a>
+</div>
 
     </section>
 
@@ -341,9 +420,9 @@
                             and time into something extraordinary.
                         </p>
 
-                        <a href="/Home/About">
+                      <!--  <a href="/Home/About">
                             Read More
-                        </a>
+                        </a> -->
 
                     </div>
 
@@ -489,6 +568,8 @@
                     &copy;
                     <span id="displayYear"></span>
                     Farmhouse Bakery
+                    &middot;
+                    <a href="/Home/Privacy">Privacy Policy</a>
                 </p>
 
             </div>
@@ -497,22 +578,160 @@
 
     </footer>
 
-
     <!-- JAVASCRIPT -->
 
-    <script src="~/js/jquery-3.4.1.min.js"></script>
+    <script src="~/js/jquery-3.4.1.min.js" asp-append-version="true"></script>
 
-    <script src="~/js/bakeryscript.js"></script>
+    <!--<script src="~/js/bakeryscript.js" asp-append-version="true"></script>
 
-    <script src="https://unpkg.com/isotope-layout@3.0.4/dist/isotope.pkgd.min.js"></script>
+     <script src="https://unpkg.com/isotope-layout@3.0.4/dist/isotope.pkgd.min.js"></script> 
 
-    <script src="~/js/custom.js"></script>
+    <script src="~/js/custom.js" asp-append-version="true"></script> -->
 
+    <!-- Bootstrap: opens the mobile navigation menu -->
+    <script src="~/js/bakeryscript.js" asp-append-version="true"></script>
 
-    <script>
-        document.getElementById("displayYear").textContent =
-            new Date().getFullYear();
-    </script>
+<script>
+(function () {
+    const year = document.getElementById("displayYear");
+    if (year) year.textContent = new Date().getFullYear();
+
+    const filters = document.querySelectorAll(".filters_menu li");
+    const viewMoreLink = document.getElementById("viewMoreLink");
+    const menuItems = document.getElementById("menuItems");
+    const grid = document.querySelector(".grid");
+    const cards = Array.from(document.querySelectorAll(".grid > .all"));
+
+    const COLLAPSED_COUNT = 3;
+    const EXPANDED_COUNT = 6;   // shown before the list starts scrolling
+
+    let currentFilter = "*";
+    let expanded = false;
+
+    function matching(filter) {
+        return cards.filter(function (card) {
+            return filter === "*" ||
+                card.classList.contains(filter.substring(1));
+        });
+    }
+
+    // Collapsed: the first three items. Expanded: every item.
+    function showCards(filter, showAll) {
+        const matchingCards = matching(filter);
+
+        cards.forEach(function (card) {
+            card.style.setProperty("display", "none", "important");
+        });
+
+        (showAll ? matchingCards : matchingCards.slice(0, COLLAPSED_COUNT))
+            .forEach(function (card) {
+                card.style.setProperty("display", "block", "important");
+            });
+    }
+
+    // Height of six cards at the current screen width
+    // (two rows of three on desktop, more rows on smaller screens).
+    function sixItemHeight() {
+        const visible = cards.filter(function (card) {
+            return card.offsetParent !== null;
+        });
+
+        if (!visible.length) return 0;
+
+        const card = visible[0];
+        const perRow = Math.max(1, Math.round(grid.clientWidth / card.offsetWidth));
+        // The column's height already includes the card's top margin.
+        const height = Math.ceil(EXPANDED_COUNT / perRow) * card.offsetHeight;
+
+        // With fewer than three per row (tablets, phones) six items would be
+        // taller than the screen, so cap the list at 75% of the screen height.
+        if (perRow < 3) {
+            return Math.min(height,
+                Math.max(card.offsetHeight, Math.round(window.innerHeight * 0.75)));
+        }
+
+        return height;
+    }
+
+    // Reserve the height of the tallest collapsed filter result so the
+    // page below the menu doesn't jump when switching filters.
+    function reserveGridHeight() {
+        if (!grid) return;
+
+        grid.style.minHeight = "";
+
+        let tallest = 0;
+        ["*", ".bakery", ".burger", ".others"].forEach(function (filter) {
+            showCards(filter, false);
+            tallest = Math.max(tallest, grid.offsetHeight);
+        });
+
+        grid.style.minHeight = tallest + "px";
+        render();
+    }
+
+    function render() {
+        showCards(currentFilter, expanded);
+
+        if (expanded) {
+            // A fixed six-item window; anything beyond that scrolls.
+            const height = sixItemHeight();
+            menuItems.style.height = height + "px";
+            menuItems.style.overflowY = "auto";
+            menuItems.style.overflowX = "hidden";
+        } else {
+            menuItems.style.height = "";
+            menuItems.style.overflowY = "";
+            menuItems.style.overflowX = "";
+            menuItems.scrollTop = 0;
+        }
+
+        if (viewMoreLink) {
+            const hasMore = matching(currentFilter).length > COLLAPSED_COUNT;
+
+            viewMoreLink.textContent = expanded ? "Show Less" : "View More";
+            viewMoreLink.setAttribute("aria-expanded", expanded);
+            // Hidden rather than removed, so the page doesn't shift.
+            viewMoreLink.style.visibility =
+                expanded || hasMore ? "visible" : "hidden";
+        }
+    }
+
+    if (viewMoreLink) {
+        viewMoreLink.addEventListener("click", function (event) {
+            event.preventDefault();
+            expanded = !expanded;
+            render();
+        });
+    }
+
+    filters.forEach(function (filterButton) {
+        filterButton.addEventListener("click", function () {
+            currentFilter = filterButton.getAttribute("data-filter");
+            menuItems.scrollTop = 0;
+            render();
+
+            filters.forEach(function (item) {
+                item.classList.remove("active");
+            });
+
+            filterButton.classList.add("active");
+        });
+    });
+
+    render();
+
+    // Measure again once images and fonts have loaded, and when the
+    // window is resized (cards wrap differently at different widths).
+    window.addEventListener("load", reserveGridHeight);
+
+    let resizeTimer;
+    window.addEventListener("resize", function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(reserveGridHeight, 150);
+    });
+})();
+</script>
 
 </body>
 

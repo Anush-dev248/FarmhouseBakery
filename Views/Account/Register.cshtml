@@ -81,6 +81,19 @@
             border-color: #ffbe33;
         }
 
+        .register-card .admin-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            cursor: pointer;
+        }
+
+        .register-card .admin-check input {
+            width: auto;
+            margin: 0;
+        }
+
         .register-button {
             width: 100%;
             padding: 12px;
@@ -165,6 +178,14 @@
                 <span asp-validation-for="ConfirmPassword"
                       class="text-danger"></span>
 
+                @if (User.IsInRole("Admin"))
+                {
+                    <label class="admin-check">
+                        <input asp-for="IsAdmin" type="checkbox" />
+                        Make this account an admin
+                    </label>
+                }
+
                 <button type="submit" class="register-button">
                     Register
                 </button>
@@ -188,5 +209,6 @@
 
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/password-toggle.js" asp-append-version="true"></script>
 </body>
 </html>

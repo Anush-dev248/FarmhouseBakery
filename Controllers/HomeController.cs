@@ -15,8 +15,16 @@ public class HomeController : Controller
     {
         _context = context;
     }
-
     public async Task<IActionResult> Index()
+    {
+        var menuItems = await _context.MenuItems
+            .OrderByDescending(x => x.Id)
+            .ToListAsync();
+
+        return View(menuItems);
+    }
+
+    /* public async Task<IActionResult> Index()
     {
         var menuItems = await _context.MenuItems
             .OrderByDescending(x => x.Id)
@@ -24,7 +32,8 @@ public class HomeController : Controller
             .ToListAsync();
 
         return View(menuItems);
-    }
+    } */
+
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AdminIndex()
     {
@@ -41,15 +50,38 @@ public class HomeController : Controller
         return View();
     }
 
-    public async Task<IActionResult> Menu()
-    {
-        var menuItems = await _context.MenuItems
-            .OrderBy(x => x.Category)
-            .ThenBy(x => x.Id)
-            .ToListAsync();
+public async Task<IActionResult> Menu(string category = "all")
+{
+    var menuItems = await _context.MenuItems
+        .OrderBy(x => x.Category)
+        .ThenBy(x => x.Id)
+        .ToListAsync();
 
-        return View(menuItems);
+    if (!string.IsNullOrWhiteSpace(category) &&
+        category.ToLowerInvariant() != "all")
+    {
+        menuItems = menuItems.Where(item =>
+        {
+            string normalizedCategory = new string(
+                (item.Category ?? "")
+                .Where(char.IsLetterOrDigit)
+                .ToArray()
+            ).ToLowerInvariant();
+
+            return category.ToLowerInvariant() switch
+            {
+                "bakery" => normalizedCategory == "bakery",
+                "burger" => normalizedCategory.Contains("grab")
+                             && normalizedCategory.Contains("go"),
+                "others" => normalizedCategory == "other"
+                            || normalizedCategory == "others",
+                _ => true
+            };
+        }).ToList();
     }
+
+    return View(menuItems);
+}
 
     [ResponseCache(
         Duration = 0,

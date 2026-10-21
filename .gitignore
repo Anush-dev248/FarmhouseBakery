@@ -7,3 +7,6 @@ appsettings.Development.json
 farmhousebakery.db
 farmhousebakery-backup.db
 secrets.json
+# SQLite working files (can contain real data)
+*.db-shm
+*.db-wal

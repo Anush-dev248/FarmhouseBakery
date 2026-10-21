@@ -131,9 +131,21 @@ tr:hover { background: #fafafa; }
 
 <h1> Farmhouse Bakery </h1>
 
-<a href="/Home/AdminIndex" class="back_home">
-    ← Back to Main
-</a>
+<div style="display: flex; align-items: center; gap: 20px;">
+
+    <a href="@(User.IsInRole("Admin") ? "/Home/AdminIndex" : "/")" class="back_home">
+        ← Back to Main
+    </a>
+
+    <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
+        @Html.AntiForgeryToken()
+        <button type="submit"
+                style="background: #ffbe33; color: #222; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; cursor: pointer;">
+            Logout
+        </button>
+    </form>
+
+</div>
 
 </header>
 
@@ -170,6 +182,8 @@ tr:hover { background: #fafafa; }
       id="menuForm">
 
 @Html.AntiForgeryToken()
+
+<div asp-validation-summary="All" style="color: #ff7777; margin-bottom: 12px;"></div>
 
 <!-- ID -->
 
@@ -211,6 +225,8 @@ tr:hover { background: #fafafa; }
 
 <option value="Cold Grab N' Go"> Cold Grab N' Go </option>
 
+<option value="Others">Others</option>
+
 </select>
 
 </div>
@@ -226,7 +242,7 @@ tr:hover { background: #fafafa; }
     <input type="file"
            id="imageFile"
            name="imageFile"
-           accept="image/*"
+           accept=".jpg,.jpeg,.png,.webp"
            onchange="previewImage(event)" />
 
     <img id="imagePreview"
@@ -270,6 +286,28 @@ Cancel
 </div>
 
 </form>
+
+</div>
+
+
+<!-- CATEGORY FILTER -->
+
+<div style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+
+    <label for="categoryFilter" style="font-weight: 600;">
+        Filter by Category:
+    </label>
+
+    <select id="categoryFilter"
+            onchange="filterMenuItems()"
+            style="padding: 10px; border: 1px solid #d5d5d5; border-radius: 6px; min-width: 200px;">
+
+        <option value="all">All Categories</option>
+        <option value="Bakery">Bakery</option>
+        <option value="Cold Grab N' Go">Cold Grab N' Go</option>
+        <option value="Others">Others</option>
+
+    </select>
 
 </div>
 
@@ -492,6 +530,28 @@ document.getElementById("imagePreview") .style.display = "none";
 
 }
 
+function filterMenuItems() {
+    const selectedCategory =
+        document.getElementById("categoryFilter").value;
+
+    const rows = document.querySelectorAll(
+        ".table_container tbody tr"
+    );
+
+    rows.forEach(function (row) {
+        const categoryCell = row.cells[3];
+        const category = categoryCell.textContent.trim();
+
+        if (
+            selectedCategory === "all" ||
+            category === selectedCategory
+        ) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
 </script>
 
 </body>
