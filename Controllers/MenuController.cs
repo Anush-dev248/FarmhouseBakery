@@ -88,7 +88,14 @@ namespace FarmhouseBakery.Controllers
                 // Keep old image unless a new one is selected
                 if (imageFile != null && imageFile.Length > 0)
                 {
+                    var oldImageUrl = existingItem.ImageUrl;
+
                     existingItem.ImageUrl = await SaveImage(imageFile);
+
+                    await _context.SaveChangesAsync();
+                    await DeleteImageIfUnused(oldImageUrl);
+
+                    return RedirectToAction(nameof(Manage));
                 }
             }
 
@@ -141,6 +148,42 @@ namespace FarmhouseBakery.Controllers
             return matches ? null : "The selected file is not a valid image.";
         }
 
+        // Deletes an uploaded image file once no menu item uses it.
+        // Only touches uploaded files (GUID names like "1d32fbfd-....png"),
+        // never the site's own images such as LogoBLKbg.png.
+        private async Task DeleteImageIfUnused(string? imageUrl)
+        {
+            if (string.IsNullOrEmpty(imageUrl) ||
+                !imageUrl.StartsWith("/images/"))
+            {
+                return;
+            }
+
+            var fileName = Path.GetFileName(imageUrl);
+
+            if (!Guid.TryParse(Path.GetFileNameWithoutExtension(fileName), out _))
+            {
+                return;
+            }
+
+            if (await _context.MenuItems.AnyAsync(x => x.ImageUrl == imageUrl))
+            {
+                return;
+            }
+
+            var filePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "images",
+                fileName
+            );
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
+
         private async Task<string> SaveImage(IFormFile imageFile)
         {
             var uploadsFolder = Path.Combine(
@@ -184,6 +227,7 @@ namespace FarmhouseBakery.Controllers
             _context.MenuItems.Remove(item);
 
             await _context.SaveChangesAsync();
+            await DeleteImageIfUnused(item.ImageUrl);
 
             return RedirectToAction(nameof(Manage));
         }

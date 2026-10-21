@@ -87,5 +87,38 @@ namespace FarmhouseBakery.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (user.Id == _userManager.GetUserId(User))
+            {
+                TempData["Error"] = "You can't delete your own account.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (await _userManager.IsInRoleAsync(user, "Admin") &&
+                (await _userManager.GetUsersInRoleAsync("Admin")).Count <= 1)
+            {
+                TempData["Error"] = "There must be at least one admin.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+
+            TempData[result.Succeeded ? "Message" : "Error"] = result.Succeeded
+                ? $"{user.Email} has been deleted."
+                : "Could not delete this user. Please try again.";
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

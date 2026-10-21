@@ -69,6 +69,12 @@
 
         .remove_admin:hover { background: #fdecec; }
 
+        .delete_user { background: #dc3545; color: white; }
+
+        .delete_user:hover { background: #b52a37; }
+
+        .user_table td form { display: inline-block; margin: 2px 4px 2px 0; }
+
         .muted { color: #999; font-size: 13px; }
 
         @@media (max-width: 640px) {
@@ -174,6 +180,18 @@
                                     {
                                         <button type="submit" class="role_btn make_admin">Make Admin</button>
                                     }
+                                </form>
+
+                                <form asp-controller="Users"
+                                      asp-action="Delete"
+                                      method="post"
+                                      onsubmit="return confirm('Delete this account? This cannot be undone.');">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden" name="id" value="@user.Id" />
+
+                                    <button type="submit" class="role_btn delete_user">Delete</button>
                                 </form>
                             }
                         </td>

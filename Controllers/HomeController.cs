@@ -17,6 +17,14 @@ public class HomeController : Controller
     }
     public async Task<IActionResult> Index()
     {
+        // Logged-in users always see their own dashboard instead of the public home page.
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return User.IsInRole("Admin")
+                ? RedirectToAction(nameof(AdminIndex))
+                : RedirectToAction(nameof(Dashboard));
+        }
+
         var menuItems = await _context.MenuItems
             .OrderByDescending(x => x.Id)
             .ToListAsync();

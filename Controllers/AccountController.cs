@@ -1,6 +1,7 @@
 using FarmhouseBakery.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +48,7 @@ namespace FarmhouseBakery.Controllers
         [ValidateAntiForgeryToken]
         [EnableRateLimiting("auth")]
         public async Task<IActionResult> Login(
-            string email, string password)
+            string email, string password, bool rememberMe = false)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
@@ -58,21 +59,29 @@ namespace FarmhouseBakery.Controllers
                 return View();
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                user.UserName!,
+            // Checks the password (and lockout) without signing in yet.
+            var result = await _signInManager.CheckPasswordSignInAsync(
+                user,
                 password,
-                isPersistent: false,
                 lockoutOnFailure: true);
 
                 if (result.Succeeded)
                 {
+                    // "Remember me": stay logged in for 14 days, even after closing the browser.
+                    // Otherwise the normal 2-hour login from Program.cs applies.
+                    await _signInManager.SignInAsync(user, new AuthenticationProperties
+                    {
+                        IsPersistent = rememberMe,
+                        ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(14) : null
+                    });
+
                     if (await _userManager.IsInRoleAsync(user, "Admin"))
                     {
                         return RedirectToAction("AdminIndex", "Home");
                     }
 
-                    // Normal users go straight to menu management.
-                    return RedirectToAction("Manage", "Menu");
+                    // Normal users go to their own dashboard.
+                    return RedirectToAction("Dashboard", "Home");
                 }
 
             ModelState.AddModelError(
@@ -170,6 +179,52 @@ namespace FarmhouseBakery.Controllers
                 ModelState.AddModelError("", error.Description);
 
             return View(model);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        [EnableRateLimiting("auth")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(
+                user, model.CurrentPassword, model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError("", error.Description);
+                }
+
+                return View(model);
+            }
+
+            // Keep this browser logged in after the password change.
+            await _signInManager.RefreshSignInAsync(user);
+
+            TempData["Message"] = "Your password has been changed.";
+
+            return RedirectToAction(nameof(ChangePassword));
         }
 
         [HttpPost]
