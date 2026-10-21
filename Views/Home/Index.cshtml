@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Farmhouse Bakery";
     Layout = null; // complete page; does not use _Layout
+
+    // AdminIndex.cshtml reuses this page and sets AdminMode to show the admin header.
+    bool adminMode = ViewData["AdminMode"] as bool? == true;
 }
 
 <!DOCTYPE html>
@@ -12,7 +15,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Farmhouse Bakery</title>
+    <title>@(!adminMode ? "Farmhouse Bakery" : User.IsInRole("Admin") ? "Admin Dashboard - Farmhouse Bakery" : "Dashboard - Farmhouse Bakery")</title>
 
     <link rel="stylesheet" href="~/css/bakeryscript.css" asp-append-version="true" />
     <!-- Font Awesome disabled -->
@@ -66,7 +69,7 @@
         <div class="container">
             <nav class="navbar navbar-expand-lg custom_nav-container">
 
-                <a class="navbar-brand" href="/">
+                <a class="navbar-brand" href="@(!adminMode ? "/" : User.IsInRole("Admin") ? "/Home/AdminIndex" : "/Home/Dashboard")">
                     <span>
                         <img src="~/images/LogoBLKbg.png"
                              width="50"
@@ -88,36 +91,92 @@
                 <div class="collapse navbar-collapse"
                      id="navbarSupportedContent">
 
-                    <ul class="navbar-nav mx-auto">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="/">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Home/Index#menu">Menu</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Home/Index#about">About</a>
-                        </li>
-                    </ul>
+                    @if (adminMode)
+                    {
+                        <!-- DASHBOARD HEADER (admins also see Registration and Users) -->
+                        <ul class="navbar-nav mx-auto">
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Account/Register">Registration</a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Menu/Manage">Menu Items</a>
+                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Users">Users</a>
+                                </li>
+                            }
+                        </ul>
 
-                    <div class="user_option">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <a href="/Menu/Manage" class="order_online" style="margin-right: 12px;">
-                                Manage Menu
-                            </a>
-                        }
+                        <div class="user_option">
+                            <form asp-controller="Account"
+                                  asp-action="Logout"
+                                  method="post"
+                                  style="display:inline;">
 
-                        <a href="/Account/Login" class="user_link" title="Login">
-                            <svg width="18" height="18" viewBox="0 0 24 24"
-                                 fill="none" stroke="currentColor"
-                                 stroke-width="2" stroke-linecap="round"
-                                 stroke-linejoin="round">
-                                <circle cx="12" cy="8" r="4"></circle>
-                                <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"></path>
-                            </svg>
-                        </a>
-                    </div>
+                                @Html.AntiForgeryToken()
+
+                                <button type="submit"
+                                        class="order_online"
+                                        style="border:none; cursor:pointer;">
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    else
+                    {
+                        <ul class="navbar-nav mx-auto">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Home/Index#menu">Menu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Home/Index#about">About</a>
+                            </li>
+                        </ul>
+
+                        <div class="user_option">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <a href="/Menu/Manage" class="order_online" style="margin-right: 12px;">
+                                    Manage Menu
+                                </a>
+
+                                <form asp-controller="Account"
+                                      asp-action="Logout"
+                                      method="post"
+                                      style="display:inline;">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <button type="submit"
+                                            class="order_online"
+                                            style="border:none; cursor:pointer;">
+                                        Logout
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <a href="/Account/Login" class="user_link" title="Login">
+                                    <svg width="18" height="18" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round"
+                                         stroke-linejoin="round">
+                                        <circle cx="12" cy="8" r="4"></circle>
+                                        <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"></path>
+                                    </svg>
+                                </a>
+                            }
+                        </div>
+                    }
 
                 </div>
             </nav>

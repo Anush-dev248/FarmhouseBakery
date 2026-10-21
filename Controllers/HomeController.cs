@@ -45,6 +45,23 @@ public class HomeController : Controller
         return View(menuItems);
     }
 
+    // Dashboard for logged-in users who are not admins (same page, fewer links).
+    [Authorize]
+    public async Task<IActionResult> Dashboard()
+    {
+        if (User.IsInRole("Admin"))
+        {
+            return RedirectToAction(nameof(AdminIndex));
+        }
+
+        var menuItems = await _context.MenuItems
+            .OrderByDescending(x => x.Id)
+            .Take(3)
+            .ToListAsync();
+
+        return View("AdminIndex", menuItems);
+    }
+
     public IActionResult Privacy()
     {
         return View();

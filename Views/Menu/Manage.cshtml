@@ -133,7 +133,7 @@ tr:hover { background: #fafafa; }
 
 <div style="display: flex; align-items: center; gap: 20px;">
 
-    <a href="@(User.IsInRole("Admin") ? "/Home/AdminIndex" : "/")" class="back_home">
+    <a href="@(User.IsInRole("Admin") ? "/Home/AdminIndex" : "/Home/Dashboard")" class="back_home">
         ← Back to Main
     </a>
 
