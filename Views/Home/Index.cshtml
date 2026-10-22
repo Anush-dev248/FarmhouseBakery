@@ -28,6 +28,56 @@
             scroll-padding-top: 90px;
         }
 
+        /* Menu cards: same height for every item.
+           Name = 1 line, ingredients = always 2 lines ("..." if longer;
+           the full text shows on hover via the title attribute). */
+        /* Compact grey details area (style.css uses 25px padding) */
+        #menu .box .detail-box {
+            padding: 20px 22px 18px;
+        }
+
+        #menu .box .detail-box h5 {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 6px;
+        }
+
+        #menu .box .detail-box h6 {
+            margin: 8px 0 0;
+        }
+
+        #menu .box .detail-box p {
+            margin-bottom: 4px;
+            line-height: 1.5;
+            height: 3em; /* exactly 2 lines */
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            overflow: hidden;
+        }
+
+        /* Header labels stay on one line ("Menu Items", not "Menu / Items") */
+        .custom_nav-container .nav-link,
+        .account_link {
+            white-space: nowrap;
+        }
+
+        /* Small "Change Password" link next to Logout */
+        .user_option .account_link {
+            color: #ffffff;
+            font-size: 14px;
+            margin: 0 18px 0 0;
+            opacity: 0.85;
+        }
+
+        .user_option .account_link:hover {
+            color: #ffbe33;
+            opacity: 1;
+            text-decoration: none;
+        }
+
         .board_item {
             position: absolute;
             inset: 0;
@@ -93,29 +143,27 @@
 
                     @if (adminMode)
                     {
-                        <!-- DASHBOARD HEADER (admins also see Registration and Users) -->
+                        <!-- DASHBOARD HEADER: main links in the middle (admins also see Careers and Users).
+                             New accounts are added from Users > + Add User. -->
                         <ul class="navbar-nav mx-auto">
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" href="/Account/Register">Registration</a>
-                                </li>
-                            }
                             <li class="nav-item">
                                 <a class="nav-link" href="/Menu/Manage">Menu Items</a>
                             </li>
                             @if (User.IsInRole("Admin"))
                             {
                                 <li class="nav-item">
+                                    <a class="nav-link" href="/Careers/Manage">Careers</a>
+                                </li>
+                                <li class="nav-item">
                                     <a class="nav-link" href="/Users">Users</a>
                                 </li>
                             }
-                            <li class="nav-item">
-                                <a class="nav-link" href="/Account/ChangePassword">Change Password</a>
-                            </li>
                         </ul>
 
+                        <!-- Account links on the right -->
                         <div class="user_option">
+                            <a href="/Account/ChangePassword" class="account_link">Change Password</a>
+
                             <form asp-controller="Account"
                                   asp-action="Logout"
                                   method="post"
@@ -142,6 +190,9 @@
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/Home/Index#about">About</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/Careers">Careers</a>
                             </li>
                         </ul>
 
@@ -273,6 +324,9 @@
 </div>
 
 
+    @* Dashboards (admin and user) only show the header and main picture. *@
+    @if (!adminMode)
+    {
     <!-- MENU -->
 
     <section id="menu"
@@ -397,7 +451,6 @@
 
             </div>
 
-        </div>
         </div>
 
         <div class="btn-box text-center" style="margin: 30px 0;">
@@ -617,20 +670,23 @@
         </div>
 
     </footer>
+    }
 
     <!-- JAVASCRIPT -->
 
-    <script src="~/js/jquery-3.4.1.min.js" asp-append-version="true"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
 
     <!--<script src="~/js/bakeryscript.js" asp-append-version="true"></script>
 
-     <script src="https://unpkg.com/isotope-layout@3.0.4/dist/isotope.pkgd.min.js"></script> 
+     <script src="~/lib/isotope/isotope.pkgd.min.js"></script> 
 
     <script src="~/js/custom.js" asp-append-version="true"></script> -->
 
     <!-- Bootstrap: opens the mobile navigation menu -->
     <script src="~/js/bakeryscript.js" asp-append-version="true"></script>
 
+@if (!adminMode)
+{
 <script>
 (function () {
     const year = document.getElementById("displayYear");
@@ -772,6 +828,7 @@
     });
 })();
 </script>
+}
 
 </body>
 

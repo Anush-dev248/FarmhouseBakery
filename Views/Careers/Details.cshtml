@@ -1,0 +1,279 @@
+@model FarmhouseBakery.Models.JobDetailsViewModel
+
+@{
+    ViewData["Title"] = Model.Job.Title;
+    Layout = null; // complete page; does not use _Layout
+
+    const string applyEmail = "farmhouse@bellaliant.net";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>@Model.Job.Title - Careers - Farmhouse Bakery</title>
+
+    <link rel="stylesheet" href="~/css/bakeryscript.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
+
+    <style>
+        body { background: #f5f5f5; }
+
+        .job_page {
+            max-width: 860px;
+            margin: 40px auto 60px;
+            padding: 0 16px;
+        }
+
+        .back_link {
+            display: inline-block;
+            color: #d89500;
+            font-weight: bold;
+            margin-bottom: 18px;
+            text-decoration: none;
+        }
+
+        .back_link:hover { color: #b37a00; text-decoration: none; }
+
+        .job_detail {
+            background: white;
+            border-radius: 12px;
+            padding: 36px 40px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Same font as the job titles on the Careers list
+           (style.css makes every h1 use Dancing Script) */
+        .job_detail h1 {
+            margin: 0 0 14px;
+            color: #222;
+            font-size: 34px;
+            font-family: "Open Sans", sans-serif;
+            font-weight: 500;
+        }
+
+        .job_meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .job_tag {
+            background: #fff4dc;
+            color: #8a5d00;
+            border-radius: 14px;
+            padding: 4px 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .job_date {
+            color: #999;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        .hidden_note {
+            background: #e4e4e4;
+            color: #444;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 20px;
+        }
+
+        .job_description {
+            color: #444;
+            font-size: 16px;
+            line-height: 1.8;
+            white-space: pre-line; /* keeps the line breaks the admin typed */
+        }
+
+        .apply_box {
+            margin-top: 32px;
+            padding: 24px;
+            background: #fff9ec;
+            border: 1px solid #ffe2a3;
+            border-radius: 10px;
+        }
+
+        .apply_box h3 { margin-top: 0; color: #222; }
+
+        .apply_box p { color: #555; }
+
+        .apply_box a { color: #b37a00; }
+
+        .apply_btn {
+            display: inline-block;
+            background: #ffbe33;
+            color: #222 !important;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .apply_btn:hover { background: #e69c00; text-decoration: none; }
+
+        button.apply_btn { border: none; cursor: pointer; margin-top: 18px; }
+
+        .apply_grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .apply_field { display: flex; flex-direction: column; }
+
+        .apply_field.full { grid-column: 1 / -1; }
+
+        .apply_field label { font-weight: bold; color: #333; margin-bottom: 6px; }
+
+        .apply_field input,
+        .apply_field textarea {
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+        }
+
+        .apply_field input[type="file"] { padding: 8px; }
+
+        .apply_field input:focus,
+        .apply_field textarea:focus { outline: 2px solid #ffbe33; border-color: #ffbe33; }
+
+        .apply_error { color: #c62828; }
+
+        .apply_error ul { padding-left: 18px; margin-bottom: 12px; }
+
+        .apply_success {
+            background: #e8f6ea;
+            color: #1e6b2b;
+            border: 1px solid #b7e0bd;
+            border-radius: 6px;
+            padding: 14px 16px;
+        }
+
+        .apply_contact { margin: 16px 0 0; font-size: 14px; }
+
+        @@media (max-width: 576px) {
+            .apply_grid { grid-template-columns: 1fr; }
+        }
+
+        @@media (max-width: 576px) {
+            .job_detail { padding: 24px 20px; }
+            .job_detail h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <partial name="_PublicHeader" />
+
+    <main class="job_page">
+
+        <a href="/Careers" class="back_link">← All Openings</a>
+
+        <article class="job_detail">
+
+            @if (!Model.Job.IsActive)
+            {
+                <div class="hidden_note">
+                    Admin preview: this posting is hidden and not visible to candidates.
+                </div>
+            }
+
+            <h1>@Model.Job.Title</h1>
+
+            <div class="job_meta">
+                <span class="job_tag">@Model.Job.JobType</span>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Job.Pay))
+                {
+                    <span class="job_tag">@Model.Job.Pay</span>
+                }
+
+                <span class="job_date">Posted @Model.Job.PostedDate.ToLocalTime().ToString("MMM d, yyyy")</span>
+            </div>
+
+            <div class="job_description">@Model.Job.Description</div>
+
+            <div class="apply_box" id="apply">
+                <h3>Apply for this job</h3>
+
+                @if (TempData["Applied"] is string applied)
+                {
+                    <div class="apply_success">@applied</div>
+                }
+                else if (Model.Job.IsActive)
+                {
+                    <p>
+                        Fill in your details and attach your resume.
+                        Each email address can apply up to 2 times in 30 days.
+                    </p>
+
+                    <form asp-controller="Careers"
+                          asp-action="Apply"
+                          asp-route-id="@Model.Job.Id"
+                          asp-fragment="apply"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        @Html.AntiForgeryToken()
+
+                        <div asp-validation-summary="All" class="apply_error"></div>
+
+                        <div class="apply_grid">
+                            <div class="apply_field">
+                                <label asp-for="Form.FullName"></label>
+                                <input asp-for="Form.FullName" maxlength="100" autocomplete="name" required />
+                            </div>
+
+                            <div class="apply_field">
+                                <label asp-for="Form.Email"></label>
+                                <input asp-for="Form.Email" type="email" maxlength="256" autocomplete="email" required />
+                            </div>
+
+                            <div class="apply_field">
+                                <label asp-for="Form.Phone"></label>
+                                <input asp-for="Form.Phone" type="tel" maxlength="30" autocomplete="tel" />
+                            </div>
+
+                            <div class="apply_field">
+                                <label for="resume">Resume (PDF or Word, max 5 MB)</label>
+                                <input type="file" id="resume" name="resume"
+                                       accept=".pdf,.doc,.docx" required />
+                            </div>
+
+                            <div class="apply_field full">
+                                <label asp-for="Form.Message"></label>
+                                <textarea asp-for="Form.Message" maxlength="2000" rows="4"
+                                          placeholder="Tell us a little about yourself"></textarea>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="apply_btn">Submit Application</button>
+                    </form>
+                }
+
+                <p class="apply_contact">
+                    Questions? Email <a href="mailto:@applyEmail">@applyEmail</a>.
+                </p>
+            </div>
+
+        </article>
+
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <!-- Bootstrap: opens the mobile navigation menu -->
+    <script src="~/js/bakeryscript.js" asp-append-version="true"></script>
+
+</body>
+
+</html>

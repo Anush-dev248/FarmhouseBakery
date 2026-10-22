@@ -1,0 +1,162 @@
+@model List<FarmhouseBakery.Models.JobApplication>
+
+@{
+    ViewData["Title"] = "Job Applications";
+    Layout = null;
+
+    var jobTitle = ViewData["JobTitle"] as string;
+    int? jobId = Context.Request.Query.ContainsKey("jobId")
+        ? int.TryParse(Context.Request.Query["jobId"], out var parsed) ? parsed : null
+        : null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Job Applications - Farmhouse Bakery</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
+
+        .admin_header { background: #000; color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+        .admin_header h1 { margin: 0; font-size: 24px; }
+
+        .back_home { color: white; text-decoration: none; }
+
+        .back_home:hover { color: #ffbe33; }
+
+        .page_container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .page_top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+
+        .page_top h2 { margin: 0; }
+
+        .link { color: #d89500; font-weight: bold; text-decoration: none; }
+
+        .msg { padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; background: #e8f6ea; color: #1e6b2b; border: 1px solid #b7e0bd; }
+
+        .app_card { background: white; border-radius: 10px; padding: 22px 24px; margin-bottom: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.06); }
+
+        .app_top { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+        .app_top h4 { margin: 0 0 4px; }
+
+        .app_job { color: #8a5d00; font-weight: bold; font-size: 14px; }
+
+        .app_info { color: #666; font-size: 14px; margin-top: 6px; line-height: 1.6; }
+
+        .app_info a { color: #333; }
+
+        .app_message { margin-top: 12px; padding: 12px 14px; background: #fafafa; border-left: 3px solid #ffbe33; white-space: pre-line; color: #444; }
+
+        .actions { display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+
+        .actions form { margin: 0; }
+
+        .btn { border: none; padding: 8px 14px; border-radius: 5px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; font-size: 14px; }
+
+        .download_btn { background: #ffbe33; color: #222; }
+
+        .delete_btn { background: #dc3545; color: white; }
+
+        .empty_message { text-align: center; padding: 40px; color: #777; background: white; border-radius: 10px; }
+
+        @@media (max-width: 700px) {
+            .admin_header { padding: 16px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="admin_header">
+        <h1>Farmhouse Bakery</h1>
+        <a href="/Careers/Manage" class="back_home">← Back to Careers</a>
+    </header>
+
+    <main class="page_container">
+
+        <div class="page_top">
+            <h2>
+                Applications
+                @if (jobTitle != null)
+                {
+                    <text> · @jobTitle</text>
+                }
+                (@Model.Count)
+            </h2>
+
+            @if (jobTitle != null)
+            {
+                <a href="/Careers/Applications" class="link">Show all applications</a>
+            }
+        </div>
+
+        @if (TempData["Message"] is string message)
+        {
+            <div class="msg">@message</div>
+        }
+
+        @if (Model.Count == 0)
+        {
+            <div class="empty_message">No applications yet.</div>
+        }
+
+        @foreach (var app in Model)
+        {
+            <div class="app_card">
+
+                <div class="app_top">
+                    <div>
+                        <h4>@app.FullName</h4>
+                        <div class="app_job">@(app.JobPosting?.Title ?? "Deleted job")</div>
+                        <div class="app_info">
+                            <a href="mailto:@app.Email">@app.Email</a>
+                            @if (!string.IsNullOrWhiteSpace(app.Phone))
+                            {
+                                <text> · <a href="tel:@app.Phone">@app.Phone</a></text>
+                            }
+                            <br />
+                            Applied @app.SubmittedDate.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <a class="btn download_btn"
+                           asp-controller="Careers"
+                           asp-action="Resume"
+                           asp-route-id="@app.Id">
+                            Download Resume
+                        </a>
+
+                        <form asp-controller="Careers"
+                              asp-action="DeleteApplication"
+                              method="post"
+                              onsubmit="return confirm('Delete this application and its resume?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@app.Id" />
+                            <input type="hidden" name="jobId" value="@jobId" />
+                            <button type="submit" class="btn delete_btn">Delete</button>
+                        </form>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(app.Message))
+                {
+                    <div class="app_message">@app.Message</div>
+                }
+
+            </div>
+        }
+
+    </main>
+
+</body>
+
+</html>

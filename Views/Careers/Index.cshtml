@@ -1,0 +1,199 @@
+@model List<FarmhouseBakery.Models.JobPosting>
+
+@{
+    ViewData["Title"] = "Careers";
+    Layout = null; // complete page; does not use _Layout
+
+    const string applyEmail = "farmhouse@bellaliant.net";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Careers - Farmhouse Bakery</title>
+
+    <link rel="stylesheet" href="~/css/bakeryscript.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
+
+    <style>
+        body { background: #f5f5f5; }
+
+        .careers_hero {
+            background: #000;
+            color: white;
+            text-align: center;
+            padding: 60px 16px 70px;
+        }
+
+        .careers_hero h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 52px;
+            margin-bottom: 12px;
+        }
+
+        .careers_hero p {
+            color: #ccc;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        .careers_list {
+            max-width: 900px;
+            margin: -35px auto 60px;
+            padding: 0 16px;
+        }
+
+        .job_card {
+            background: white;
+            border-radius: 12px;
+            padding: 28px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .job_card h3 {
+            margin: 0 0 10px;
+            color: #222;
+            font-size: 24px;
+        }
+
+        .job_meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .job_tag {
+            background: #fff4dc;
+            color: #8a5d00;
+            border-radius: 14px;
+            padding: 4px 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .job_date {
+            color: #999;
+            font-size: 14px;
+            padding: 4px 0;
+        }
+
+        /* Short preview: only the first 4 lines, then "..." */
+        .job_description {
+            color: #555;
+            line-height: 1.7;
+            white-space: pre-line; /* keeps the line breaks the admin typed */
+            margin-bottom: 20px;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            line-clamp: 4;
+            overflow: hidden;
+        }
+
+        .apply_btn {
+            display: inline-block;
+            background: #ffbe33;
+            color: #222;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .apply_btn:hover { background: #e69c00; color: #222; text-decoration: none; }
+
+        .no_jobs {
+            background: white;
+            border-radius: 12px;
+            padding: 50px 30px;
+            text-align: center;
+            color: #666;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .no_jobs h3 { color: #222; }
+
+        .no_jobs a { color: #d89500; }
+
+        @@media (max-width: 576px) {
+            .careers_hero h1 { font-size: 40px; }
+            .job_card { padding: 22px 20px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <partial name="_PublicHeader" />
+
+    <!-- INTRO -->
+    <section class="careers_hero">
+        <h1>Join Our Team</h1>
+        <p>
+            We're always looking for friendly, hard-working people who love
+            good food. See our current openings below.
+        </p>
+    </section>
+
+    <!-- JOB LIST -->
+    <main class="careers_list">
+
+        @if (Model.Count == 0)
+        {
+            <div class="no_jobs">
+                <h3>No openings right now</h3>
+                <p>
+                    We don't have any positions available at the moment.
+                    You're welcome to send your resume to
+                    <a href="mailto:@applyEmail">@applyEmail</a>
+                    and we'll keep it on file.
+                </p>
+            </div>
+        }
+
+        @foreach (var job in Model)
+        {
+            <div class="job_card">
+
+                <h3>@job.Title</h3>
+
+                <div class="job_meta">
+                    <span class="job_tag">@job.JobType</span>
+
+                    @if (!string.IsNullOrWhiteSpace(job.Pay))
+                    {
+                        <span class="job_tag">@job.Pay</span>
+                    }
+
+                    <span class="job_date">Posted @job.PostedDate.ToLocalTime().ToString("MMM d, yyyy")</span>
+                </div>
+
+                <div class="job_description">@job.Description</div>
+
+                <a class="apply_btn"
+                   asp-controller="Careers"
+                   asp-action="Details"
+                   asp-route-id="@job.Id">
+                    View Details
+                </a>
+
+            </div>
+        }
+
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js" asp-append-version="true"></script>
+    <!-- Bootstrap: opens the mobile navigation menu -->
+    <script src="~/js/bakeryscript.js" asp-append-version="true"></script>
+
+</body>
+
+</html>

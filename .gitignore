@@ -10,3 +10,6 @@ secrets.json
 # SQLite working files (can contain real data)
 *.db-shm
 *.db-wal
+
+# Uploaded resumes (private candidate data)
+App_Data/

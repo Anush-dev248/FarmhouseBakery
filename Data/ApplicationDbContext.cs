@@ -15,5 +15,18 @@ namespace FarmhouseBakery.Data
         }
 
         public DbSet<MenuItem> MenuItems { get; set; }
+
+        public DbSet<JobPosting> JobPostings { get; set; }
+
+        public DbSet<JobApplication> JobApplications { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Used to count applications per email for the 30-day limit.
+            builder.Entity<JobApplication>()
+                .HasIndex(x => new { x.Email, x.SubmittedDate });
+        }
     }
 }
