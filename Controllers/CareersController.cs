@@ -24,28 +24,26 @@ namespace FarmhouseBakery.Controllers
             { ".pdf", ".doc", ".docx" };
 
         private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _environment;
+        private readonly BlobStorageService _blobStorage;
         private readonly EmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<CareersController> _logger;
 
+        // Resumes are kept in the PRIVATE "resumes" blob container, so nobody can
+        // download them by URL; admins download them through the Resume action.
         public CareersController(
             ApplicationDbContext context,
-            IWebHostEnvironment environment,
+            BlobStorageService blobStorage,
             EmailService emailService,
             IConfiguration configuration,
             ILogger<CareersController> logger)
         {
             _context = context;
-            _environment = environment;
+            _blobStorage = blobStorage;
             _emailService = emailService;
             _configuration = configuration;
             _logger = logger;
         }
-
-        // Resumes are kept outside wwwroot so nobody can download them by URL.
-        private string ResumeFolder =>
-            Path.Combine(_environment.ContentRootPath, "App_Data", "resumes");
 
         [AllowAnonymous]
         public async Task<IActionResult> Index()
@@ -135,16 +133,8 @@ namespace FarmhouseBakery.Controllers
                 return View("Details", new JobDetailsViewModel { Job = job, Form = form });
             }
 
-            // Save the resume with a random name in the private folder.
-            Directory.CreateDirectory(ResumeFolder);
-
-            var extension = Path.GetExtension(resume!.FileName).ToLowerInvariant();
-            var storedName = Guid.NewGuid().ToString() + extension;
-
-            using (var stream = new FileStream(Path.Combine(ResumeFolder, storedName), FileMode.CreateNew))
-            {
-                await resume.CopyToAsync(stream);
-            }
+            // Save the resume with a random name in the private "resumes" container.
+            var storedName = await _blobStorage.UploadResumeAsync(resume!);
 
             var application = new JobApplication
             {
@@ -154,7 +144,7 @@ namespace FarmhouseBakery.Controllers
                 Phone = string.IsNullOrWhiteSpace(form.Phone) ? null : form.Phone.Trim(),
                 Message = string.IsNullOrWhiteSpace(form.Message) ? null : form.Message.Trim(),
                 ResumeFileName = storedName,
-                ResumeOriginalName = Path.GetFileName(resume.FileName),
+                ResumeOriginalName = Path.GetFileName(resume!.FileName),
                 SubmittedDate = DateTime.UtcNow
             };
 
@@ -271,9 +261,9 @@ namespace FarmhouseBakery.Controllers
                 return NotFound();
             }
 
-            var path = Path.Combine(ResumeFolder, application.ResumeFileName);
+            var stream = await _blobStorage.OpenResumeAsync(application.ResumeFileName);
 
-            if (!System.IO.File.Exists(path))
+            if (stream == null)
             {
                 return NotFound();
             }
@@ -286,7 +276,7 @@ namespace FarmhouseBakery.Controllers
             };
 
             // Always download (never display in the browser), using the candidate's file name.
-            return PhysicalFile(path, contentType, application.ResumeOriginalName);
+            return File(stream, contentType, application.ResumeOriginalName);
         }
 
         [HttpPost]
@@ -303,21 +293,11 @@ namespace FarmhouseBakery.Controllers
             _context.JobApplications.Remove(application);
             await _context.SaveChangesAsync();
 
-            DeleteResumeFile(application.ResumeFileName);
+            await _blobStorage.DeleteResumeAsync(application.ResumeFileName);
 
             TempData["Message"] = "Application deleted.";
 
             return RedirectToAction(nameof(Applications), new { jobId });
-        }
-
-        private void DeleteResumeFile(string storedName)
-        {
-            var path = Path.Combine(ResumeFolder, Path.GetFileName(storedName));
-
-            if (System.IO.File.Exists(path))
-            {
-                System.IO.File.Delete(path);
-            }
         }
 
         public async Task<IActionResult> Manage()
@@ -418,7 +398,10 @@ namespace FarmhouseBakery.Controllers
 
             await _context.SaveChangesAsync();
 
-            resumeFiles.ForEach(DeleteResumeFile);
+            foreach (var resumeFile in resumeFiles)
+            {
+                await _blobStorage.DeleteResumeAsync(resumeFile);
+            }
 
             TempData["Message"] = "Job posting deleted.";
 

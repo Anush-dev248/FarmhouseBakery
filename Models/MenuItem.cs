@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace FarmhouseBakery.Models
 {
@@ -12,6 +13,7 @@ namespace FarmhouseBakery.Models
 
         [Required]
         [Range(0.01, 9999.99)]
+        [Precision(10, 2)] // SQL Server: decimal(10,2), e.g. 12.50
         public decimal Price { get; set; }
 
         [Required]

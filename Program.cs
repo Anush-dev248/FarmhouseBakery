@@ -8,9 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 
+// Azure SQL Database. The connection string is NOT in appsettings.json:
+// locally it comes from dotnet user-secrets, on Azure from the Web App's settings.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString, sql =>
+        // Azure SQL can drop connections briefly; retry instead of failing the request.
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
+
+// Menu images and resumes are stored in Azure Blob Storage ("AzureStorage" connection string).
+builder.Services.AddSingleton<BlobStorageService>();
 
 builder.Services
     .AddIdentity<IdentityUser, IdentityRole>(options =>

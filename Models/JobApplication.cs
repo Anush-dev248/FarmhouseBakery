@@ -27,7 +27,7 @@ namespace FarmhouseBakery.Models
         [StringLength(2000)]
         public string? Message { get; set; }
 
-        // File name on disk (random GUID name) inside App_Data/resumes.
+        // Blob name (random GUID name) in the private "resumes" blob container.
         [Required]
         [StringLength(100)]
         public string ResumeFileName { get; set; } = string.Empty;

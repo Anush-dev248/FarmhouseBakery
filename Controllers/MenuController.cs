@@ -1,5 +1,6 @@
 using FarmhouseBakery.Data;
 using FarmhouseBakery.Models;
+using FarmhouseBakery.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,12 @@ namespace FarmhouseBakery.Controllers
     public class MenuController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly BlobStorageService _blobStorage;
 
-        public MenuController(ApplicationDbContext context)
+        public MenuController(ApplicationDbContext context, BlobStorageService blobStorage)
         {
             _context = context;
+            _blobStorage = blobStorage;
         }
 
         public async Task<IActionResult> Manage()
@@ -148,20 +151,12 @@ namespace FarmhouseBakery.Controllers
             return matches ? null : "The selected file is not a valid image.";
         }
 
-        // Deletes an uploaded image file once no menu item uses it.
-        // Only touches uploaded files (GUID names like "1d32fbfd-....png"),
-        // never the site's own images such as LogoBLKbg.png.
+        // Deletes an uploaded image from Blob Storage once no menu item uses it.
+        // BlobStorageService ignores anything that isn't in the "uploads" container,
+        // so the site's own images (e.g. /images/LogoBLKbg.png) are never touched.
         private async Task DeleteImageIfUnused(string? imageUrl)
         {
-            if (string.IsNullOrEmpty(imageUrl) ||
-                !imageUrl.StartsWith("/images/"))
-            {
-                return;
-            }
-
-            var fileName = Path.GetFileName(imageUrl);
-
-            if (!Guid.TryParse(Path.GetFileNameWithoutExtension(fileName), out _))
+            if (string.IsNullOrEmpty(imageUrl))
             {
                 return;
             }
@@ -171,46 +166,14 @@ namespace FarmhouseBakery.Controllers
                 return;
             }
 
-            var filePath = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "images",
-                fileName
-            );
-
-            if (System.IO.File.Exists(filePath))
-            {
-                System.IO.File.Delete(filePath);
-            }
+            await _blobStorage.DeleteImageAsync(imageUrl);
         }
 
-        private async Task<string> SaveImage(IFormFile imageFile)
+        // Uploads the image to the "uploads" container and returns its blob URL
+        // (that URL is what gets stored in MenuItem.ImageUrl).
+        private Task<string> SaveImage(IFormFile imageFile)
         {
-            var uploadsFolder = Path.Combine(
-                Directory.GetCurrentDirectory(),
-                "wwwroot",
-                "images"
-            );
-
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
-
-            var fileName = Guid.NewGuid().ToString()
-                           + Path.GetExtension(imageFile.FileName).ToLowerInvariant();
-
-            var filePath = Path.Combine(
-                uploadsFolder,
-                fileName
-            );
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(stream);
-            }
-
-            return "/images/" + fileName;
+            return _blobStorage.UploadImageAsync(imageFile);
         }
 
         [HttpPost]
