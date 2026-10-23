@@ -121,12 +121,11 @@
             pointer-events: none;
         }
 
-        /* Turns the coloured logo black; its white background blends into the cup. */
+        /* logo-black.png is already black with a transparent background
+           (no CSS blend effects, so it looks the same on iPhone/Safari). */
         .cup_print img {
             width: 60%;
             height: auto;
-            filter: grayscale(1) brightness(0.6) contrast(10);
-            mix-blend-mode: multiply;
         }
 
         .cup_print span {
@@ -345,7 +344,7 @@
                  style="clip-path: polygon(67.78% 63.06%, 68.62% 60.27%, 71.97% 58.93%, 76.99% 58.93%, 79.92% 60.83%, 80.5% 63.62%, 79.5% 66.96%, 78.24% 82.59%, 74.48% 83.37%, 70.29% 82.59%, 68.79% 66.96%, 67.62% 64.73%);
                         transform-origin: 74.06% 71.15%;">
                 <div class="cup_print">
-                    <img src="~/images/Logowhitebg.png" alt="" />
+                    <img src="~/images/logo-black.png" alt="" />
                     <span>Coffee is a hug<br />in a mug</span>
                 </div>
             </div>
