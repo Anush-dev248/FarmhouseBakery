@@ -58,6 +58,56 @@
             overflow: hidden;
         }
 
+        /* YouTube video under the About section */
+        .video_section {
+            padding: 70px 0;
+            background: #ffffff;
+        }
+
+        .video_section .heading_container {
+            margin-bottom: 30px;
+        }
+
+        /* 16:9 box that keeps the video's shape at every screen size */
+        .video_frame {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            aspect-ratio: 16 / 9;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .video_frame iframe {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .video_section .btn-box {
+            margin-top: 30px;
+        }
+
+        /* Same gold button as "View More" in the menu (style.css only styles it there) */
+        .video_section .btn-box a {
+            display: inline-block;
+            padding: 10px 55px;
+            background-color: #ffbe33;
+            color: #ffffff;
+            border-radius: 45px;
+            transition: all 0.3s;
+        }
+
+        .video_section .btn-box a:hover {
+            background-color: #e69c00;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
         /* Header labels stay on one line ("Menu Items", not "Menu / Items") */
         .custom_nav-container .nav-link,
         .account_link {
@@ -561,6 +611,42 @@
 
                 </div>
 
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- VIDEO (YouTube: plays here, or opens on YouTube) -->
+
+    <section id="video" class="video_section">
+
+        <div class="container">
+
+            <div class="heading_container heading_center">
+                <h2>
+                    Watch Our Story
+                </h2>
+            </div>
+
+            <div class="video_frame">
+                <!-- youtube-nocookie.com: YouTube's privacy-enhanced mode (no tracking cookies until the visitor presses play) -->
+                <iframe src="https://www.youtube-nocookie.com/embed/e5VtcE7YoIQ?rel=0"
+                        title="Farmhouse Bakery video"
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen></iframe>
+            </div>
+
+            <div class="btn-box text-center">
+                <a href="https://www.youtube.com/watch?v=e5VtcE7YoIQ"
+                   class="btn1"
+                   target="_blank"
+                   rel="noopener">
+                    Watch on YouTube
+                </a>
             </div>
 
         </div>
