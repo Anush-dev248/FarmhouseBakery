@@ -1,4 +1,6 @@
+using FarmhouseBakery.Data;
 using FarmhouseBakery.Models;
+using FarmhouseBakery.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +12,17 @@ namespace FarmhouseBakery.Controllers
     public class UsersController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ApplicationDbContext _context;
+        private readonly ActivityLogger _activity;
 
-        public UsersController(UserManager<IdentityUser> userManager)
+        public UsersController(
+            UserManager<IdentityUser> userManager,
+            ApplicationDbContext context,
+            ActivityLogger activity)
         {
             _userManager = userManager;
+            _context = context;
+            _activity = activity;
         }
 
         public async Task<IActionResult> Index()
@@ -40,6 +49,17 @@ namespace FarmhouseBakery.Controllers
             return View(model);
         }
 
+        // Change history: the newest 300 entries.
+        public async Task<IActionResult> Activity()
+        {
+            var entries = await _context.ActivityLogs
+                .OrderByDescending(x => x.Timestamp)
+                .Take(300)
+                .ToListAsync();
+
+            return View(entries);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetAdmin(string id, bool makeAdmin)
@@ -59,6 +79,7 @@ namespace FarmhouseBakery.Controllers
                 }
 
                 TempData["Message"] = $"{user.Email} is now an admin.";
+                await _activity.LogAsync(User, "Admin rights given", user.Email);
             }
             else
             {
@@ -80,6 +101,7 @@ namespace FarmhouseBakery.Controllers
                 await _userManager.RemoveFromRoleAsync(user, "Admin");
 
                 TempData["Message"] = $"{user.Email} is no longer an admin.";
+                await _activity.LogAsync(User, "Admin rights removed", user.Email);
             }
 
             // Makes the change apply to that user's login within a minute (see Program.cs).
@@ -117,6 +139,11 @@ namespace FarmhouseBakery.Controllers
             TempData[result.Succeeded ? "Message" : "Error"] = result.Succeeded
                 ? $"{user.Email} has been deleted."
                 : "Could not delete this user. Please try again.";
+
+            if (result.Succeeded)
+            {
+                await _activity.LogAsync(User, "User deleted", user.Email);
+            }
 
             return RedirectToAction(nameof(Index));
         }

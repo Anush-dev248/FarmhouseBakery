@@ -1,0 +1,104 @@
+@model List<FarmhouseBakery.Models.ActivityLog>
+
+@{
+    ViewData["Title"] = "Activity";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Activity - Farmhouse Bakery</title>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body { margin: 0; font-family: Arial, sans-serif; background: #f5f5f5; color: #333; }
+
+        .admin_header { background: #000; color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+        .admin_header h1 { margin: 0; font-size: 24px; }
+
+        .back_home { color: white; text-decoration: none; }
+
+        .back_home:hover { color: #ffbe33; }
+
+        .page_container { max-width: 1000px; margin: 40px auto; padding: 0 20px; }
+
+        .summary { color: #666; margin: 0 0 20px; }
+
+        .log_table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+
+        .log_table th, .log_table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #eee; vertical-align: top; }
+
+        .log_table th { background: #222; color: white; font-weight: 600; }
+
+        .log_table tr:last-child td { border-bottom: none; }
+
+        .when { white-space: nowrap; color: #666; font-size: 14px; }
+
+        .action { font-weight: bold; }
+
+        .action_deleted { color: #a12a2a; }
+
+        .empty_message { text-align: center; padding: 40px; color: #777; background: white; border-radius: 10px; }
+
+        @@media (max-width: 640px) {
+            .admin_header { padding: 16px; }
+            .log_table thead { display: none; }
+            .log_table, .log_table tbody, .log_table tr, .log_table td { display: block; width: 100%; }
+            .log_table tr { border-bottom: 1px solid #eee; padding: 8px 0; }
+            .log_table td { border: none; padding: 4px 16px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="admin_header">
+        <h1>Farmhouse Bakery</h1>
+        <a href="/Users" class="back_home">← Back to Users</a>
+    </header>
+
+    <main class="page_container">
+
+        <h2>Activity</h2>
+        <p class="summary">Who added, changed or deleted things on the site (newest first, last 300 changes).</p>
+
+        @if (Model.Count == 0)
+        {
+            <div class="empty_message">No activity recorded yet.</div>
+        }
+        else
+        {
+            <table class="log_table">
+                <thead>
+                    <tr>
+                        <th>When</th>
+                        <th>Who</th>
+                        <th>What</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in Model)
+                    {
+                        <tr>
+                            <td class="when">@entry.Timestamp.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+                            <td>@entry.UserEmail</td>
+                            <td class="action @(entry.Action.Contains("deleted") || entry.Action.Contains("removed") ? "action_deleted" : "")">@entry.Action</td>
+                            <td>@entry.Details</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+    </main>
+
+</body>
+
+</html>

@@ -20,6 +20,8 @@ namespace FarmhouseBakery.Data
 
         public DbSet<JobApplication> JobApplications { get; set; }
 
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -27,6 +29,10 @@ namespace FarmhouseBakery.Data
             // Used to count applications per email for the 30-day limit.
             builder.Entity<JobApplication>()
                 .HasIndex(x => new { x.Email, x.SubmittedDate });
+
+            // The Activity page shows the newest entries first.
+            builder.Entity<ActivityLog>()
+                .HasIndex(x => x.Timestamp);
         }
     }
 }

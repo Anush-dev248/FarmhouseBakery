@@ -28,6 +28,7 @@ namespace FarmhouseBakery.Controllers
         private readonly EmailService _emailService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<CareersController> _logger;
+        private readonly ActivityLogger _activity;
 
         // Resumes are kept in the PRIVATE "resumes" blob container, so nobody can
         // download them by URL; admins download them through the Resume action.
@@ -36,13 +37,15 @@ namespace FarmhouseBakery.Controllers
             BlobStorageService blobStorage,
             EmailService emailService,
             IConfiguration configuration,
-            ILogger<CareersController> logger)
+            ILogger<CareersController> logger,
+            ActivityLogger activity)
         {
             _context = context;
             _blobStorage = blobStorage;
             _emailService = emailService;
             _configuration = configuration;
             _logger = logger;
+            _activity = activity;
         }
 
         [AllowAnonymous]
@@ -294,6 +297,7 @@ namespace FarmhouseBakery.Controllers
             await _context.SaveChangesAsync();
 
             await _blobStorage.DeleteResumeAsync(application.ResumeFileName);
+            await _activity.LogAsync(User, "Job application deleted", $"{application.FullName} ({application.Email})");
 
             TempData["Message"] = "Application deleted.";
 
@@ -322,7 +326,10 @@ namespace FarmhouseBakery.Controllers
                 return View("Manage", jobs);
             }
 
-            if (job.Id == 0)
+            // Saved before SaveChanges, which gives a new posting its Id.
+            bool isNew = job.Id == 0;
+
+            if (isNew)
             {
                 // ADD
                 job.PostedDate = DateTime.UtcNow;
@@ -350,6 +357,7 @@ namespace FarmhouseBakery.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await _activity.LogAsync(User, isNew ? "Job posting added" : "Job posting edited", job.Title);
 
             return RedirectToAction(nameof(Manage));
         }
@@ -369,6 +377,7 @@ namespace FarmhouseBakery.Controllers
             job.IsActive = !job.IsActive;
 
             await _context.SaveChangesAsync();
+            await _activity.LogAsync(User, job.IsActive ? "Job posting shown" : "Job posting hidden", job.Title);
 
             TempData["Message"] = job.IsActive
                 ? $"\"{job.Title}\" is now showing on the Careers page."
@@ -402,6 +411,9 @@ namespace FarmhouseBakery.Controllers
             {
                 await _blobStorage.DeleteResumeAsync(resumeFile);
             }
+
+            await _activity.LogAsync(User, "Job posting deleted",
+                $"{job.Title} ({resumeFiles.Count} application(s) removed)");
 
             TempData["Message"] = "Job posting deleted.";
 

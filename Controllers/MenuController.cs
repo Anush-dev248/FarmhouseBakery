@@ -13,11 +13,13 @@ namespace FarmhouseBakery.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly BlobStorageService _blobStorage;
+        private readonly ActivityLogger _activity;
 
-        public MenuController(ApplicationDbContext context, BlobStorageService blobStorage)
+        public MenuController(ApplicationDbContext context, BlobStorageService blobStorage, ActivityLogger activity)
         {
             _context = context;
             _blobStorage = blobStorage;
+            _activity = activity;
         }
 
         public async Task<IActionResult> Manage()
@@ -58,7 +60,10 @@ namespace FarmhouseBakery.Controllers
                 return View("Manage", items);
             }
 
-            if (item.Id == 0)
+            // Saved before SaveChanges, which gives a new item its Id.
+            bool isNew = item.Id == 0;
+
+            if (isNew)
             {
                 // ADD
 
@@ -97,12 +102,17 @@ namespace FarmhouseBakery.Controllers
 
                     await _context.SaveChangesAsync();
                     await DeleteImageIfUnused(oldImageUrl);
+                    await _activity.LogAsync(User, "Menu item edited", $"{existingItem.Name} (new picture)");
 
                     return RedirectToAction(nameof(Manage));
                 }
             }
 
             await _context.SaveChangesAsync();
+
+            await _activity.LogAsync(User,
+                isNew ? "Menu item added" : "Menu item edited",
+                $"{item.Name} ({item.Category}, ${item.Price:0.00})");
 
             return RedirectToAction(nameof(Manage));
         }
@@ -190,6 +200,7 @@ namespace FarmhouseBakery.Controllers
             _context.MenuItems.Remove(item);
 
             await _context.SaveChangesAsync();
+            await _activity.LogAsync(User, "Menu item deleted", item.Name);
             await DeleteImageIfUnused(item.ImageUrl);
 
             return RedirectToAction(nameof(Manage));

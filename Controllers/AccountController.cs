@@ -1,7 +1,6 @@
 using FarmhouseBakery.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -59,35 +58,34 @@ namespace FarmhouseBakery.Controllers
                 return View();
             }
 
-            // Checks the password (and lockout) without signing in yet.
-            var result = await _signInManager.CheckPasswordSignInAsync(
+            // "Remember me" = persistent login (14 days, see Program.cs); otherwise 2 hours.
+            var result = await _signInManager.PasswordSignInAsync(
                 user,
                 password,
+                isPersistent: rememberMe,
                 lockoutOnFailure: true);
 
-                if (result.Succeeded)
-                {
-                    // "Remember me": stay logged in for 14 days, even after closing the browser.
-                    // Otherwise the normal 2-hour login from Program.cs applies.
-                    await _signInManager.SignInAsync(user, new AuthenticationProperties
-                    {
-                        IsPersistent = rememberMe,
-                        ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(14) : null
-                    });
+            if (result.Succeeded)
+            {
+                return await RedirectAfterLogin(user);
+            }
 
-                    if (await _userManager.IsInRoleAsync(user, "Admin"))
-                    {
-                        return RedirectToAction("AdminIndex", "Home");
-                    }
-
-                    // Normal users go to their own dashboard.
-                    return RedirectToAction("Dashboard", "Home");
-                }
-
-            ModelState.AddModelError(
-                "", "Invalid email or password.");
+            ModelState.AddModelError("", result.IsLockedOut
+                ? "Too many wrong attempts. This account is locked for a few minutes."
+                : "Invalid email or password.");
 
             return View();
+        }
+
+        private async Task<IActionResult> RedirectAfterLogin(IdentityUser user)
+        {
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                return RedirectToAction("AdminIndex", "Home");
+            }
+
+            // Normal users go to their own dashboard.
+            return RedirectToAction("Dashboard", "Home");
         }
 
         [HttpGet]

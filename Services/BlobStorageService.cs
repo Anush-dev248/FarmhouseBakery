@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
@@ -6,6 +7,11 @@ namespace FarmhouseBakery.Services
     // Saves uploaded files to Azure Blob Storage (connection string "AzureStorage").
     //   "uploads" - menu item images, anonymous read (the blob URL is stored in the database)
     //   "resumes" - candidates' resumes, PRIVATE (only downloaded by admins through the site)
+    //
+    // "AzureStorage" can be either:
+    //   - just the blob address, e.g. https://farmhousebakerystorage.blob.core.windows.net
+    //     -> the Web App signs in with its own Azure identity (managed identity), no key stored
+    //   - a full connection string with an AccountKey (used for local development)
     public class BlobStorageService
     {
         private const string UploadsContainerName = "uploads";
@@ -28,6 +34,11 @@ namespace FarmhouseBakery.Services
                     throw new InvalidOperationException(
                         "Connection string 'AzureStorage' is not configured. " +
                         "Set it with dotnet user-secrets locally, or in the Web App's environment variables on Azure.");
+                }
+
+                if (connectionString.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    return new BlobServiceClient(new Uri(connectionString), new DefaultAzureCredential());
                 }
 
                 return new BlobServiceClient(connectionString);

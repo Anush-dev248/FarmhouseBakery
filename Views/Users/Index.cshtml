@@ -70,7 +70,6 @@
         .remove_admin:hover { background: #fdecec; }
 
         .delete_user { background: #dc3545; color: white; }
-
         .delete_user:hover { background: #b52a37; }
 
         .user_table td form { display: inline-block; margin: 2px 4px 2px 0; }
@@ -102,7 +101,10 @@
 
         <div class="page_top">
             <h2>Users</h2>
-            <a href="/Account/Register" class="add_btn">+ Add User</a>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="/Users/Activity" class="add_btn" style="background: #eee;">View Activity</a>
+                <a href="/Account/Register" class="add_btn">+ Add User</a>
+            </div>
         </div>
 
         <p class="summary">
@@ -152,8 +154,7 @@
                             @if (user.IsLockedOut)
                             {
                                 <span class="badge badge_locked">Locked</span>
-                            }
-                        </td>
+                            }                        </td>
 
                         <td>
                             @if (user.IsCurrentUser)

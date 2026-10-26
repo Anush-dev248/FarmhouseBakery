@@ -1,5 +1,6 @@
 using System.Threading.RateLimiting;
 using FarmhouseBakery.Data;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using FarmhouseBakery.Services;
@@ -7,6 +8,9 @@ using FarmhouseBakery.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+
+// Records who added/edited/deleted things (Users > Activity).
+builder.Services.AddScoped<ActivityLogger>();
 
 // Azure SQL Database. The connection string is NOT in appsettings.json:
 // locally it comes from dotnet user-secrets, on Azure from the Web App's settings.
@@ -56,6 +60,17 @@ builder.Services.ConfigureApplicationCookie(options =>
         : CookieSecurePolicy.Always;
     options.ExpireTimeSpan = TimeSpan.FromHours(2);
     options.SlidingExpiration = true;
+
+    // "Remember me" (a persistent login) lasts 14 days; a normal login lasts 2 hours.
+    options.Events.OnSigningIn = context =>
+    {
+        if (context.Properties.IsPersistent)
+        {
+            context.Properties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14);
+        }
+
+        return Task.CompletedTask;
+    };
 });
 
 // Max 5 login / register / password attempts per minute from one IP address.
@@ -86,11 +101,43 @@ builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
+// On Azure App Service, Azure's front end forwards each request. Read the visitor's real
+// IP and https from the headers it adds, so the attempt limits apply per visitor.
+// (Only on App Service, where WEBSITE_SITE_NAME is set; it takes the last address,
+// which Azure adds itself, so visitors can't fake it.)
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")))
+{
+    var forwardedOptions = new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    };
+    forwardedOptions.KnownIPNetworks.Clear();
+    forwardedOptions.KnownProxies.Clear();
+
+    app.UseForwardedHeaders(forwardedOptions);
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+// Content Security Policy: the browser may only load scripts, styles, fonts, images and
+// embedded frames from our own site and the few services the pages use.
+var storageHost = "https://farmhousebakerystorage.blob.core.windows.net";
+var contentSecurityPolicy = string.Join("; ",
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
+    "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+    $"img-src 'self' data: {storageHost}",
+    "frame-src https://www.google.com https://maps.google.com https://www.youtube-nocookie.com",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'");
 
 // Basic security headers on every response.
 app.Use(async (context, next) =>
@@ -98,7 +145,7 @@ app.Use(async (context, next) =>
     var headers = context.Response.Headers;
     headers["X-Content-Type-Options"] = "nosniff";
     headers["X-Frame-Options"] = "DENY";
-    headers["Content-Security-Policy"] = "frame-ancestors 'none'";
+    headers["Content-Security-Policy"] = contentSecurityPolicy;
     headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
     await next();
 });
@@ -125,7 +172,13 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider
         .GetRequiredService<ApplicationDbContext>();
 
-    await dbContext.Database.MigrateAsync();
+    // The website's database login can only read/write data (not change tables),
+    // so migrations are applied separately with "dotnet ef database update".
+    // Set Database:MigrateOnStartup=true only when the login is allowed to change tables.
+    if (app.Configuration.GetValue<bool>("Database:MigrateOnStartup"))
+    {
+        await dbContext.Database.MigrateAsync();
+    }
 
     var roleManager = scope.ServiceProvider
         .GetRequiredService<RoleManager<IdentityRole>>();
