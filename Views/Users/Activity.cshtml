@@ -87,7 +87,7 @@
                     @foreach (var entry in Model)
                     {
                         <tr>
-                            <td class="when">@entry.Timestamp.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</td>
+                            <td class="when">@entry.Timestamp.ToBakeryTime().ToString("MMM d, yyyy h:mm tt")</td>
                             <td>@entry.UserEmail</td>
                             <td class="action @(entry.Action.Contains("deleted") || entry.Action.Contains("removed") ? "action_deleted" : "")">@entry.Action</td>
                             <td>@entry.Details</td>

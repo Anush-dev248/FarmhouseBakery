@@ -198,7 +198,7 @@
                     <span class="job_tag">@Model.Job.Pay</span>
                 }
 
-                <span class="job_date">Posted @Model.Job.PostedDate.ToLocalTime().ToString("MMM d, yyyy")</span>
+                <span class="job_date">Posted @Model.Job.PostedDate.ToBakeryTime().ToString("MMM d, yyyy")</span>
             </div>
 
             <div class="job_description">@Model.Job.Description</div>

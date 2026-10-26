@@ -123,7 +123,7 @@ namespace FarmhouseBakery.Controllers
                     // The oldest recent application "expires" 30 days after it was sent.
                     var nextAllowed = recentDates[recentDates.Count - MaxApplicationsPerEmail]
                         .AddDays(ApplicationLimitDays)
-                        .ToLocalTime();
+                        .ToBakeryTime();
 
                     ModelState.AddModelError("",
                         $"This email address has already applied {MaxApplicationsPerEmail} times in the last " +

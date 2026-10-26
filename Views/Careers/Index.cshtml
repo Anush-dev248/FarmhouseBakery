@@ -173,7 +173,7 @@
                         <span class="job_tag">@job.Pay</span>
                     }
 
-                    <span class="job_date">Posted @job.PostedDate.ToLocalTime().ToString("MMM d, yyyy")</span>
+                    <span class="job_date">Posted @job.PostedDate.ToBakeryTime().ToString("MMM d, yyyy")</span>
                 </div>
 
                 <div class="job_description">@job.Description</div>
