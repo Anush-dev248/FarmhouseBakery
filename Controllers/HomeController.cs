@@ -95,6 +95,8 @@ public async Task<IActionResult> Menu(string category = "all")
 
             return category.ToLowerInvariant() switch
             {
+                "special" => normalizedCategory == "special"
+                             || normalizedCategory == "specials",
                 "bakery" => normalizedCategory == "bakery",
                 "burger" => normalizedCategory.Contains("grab")
                              && normalizedCategory.Contains("go"),

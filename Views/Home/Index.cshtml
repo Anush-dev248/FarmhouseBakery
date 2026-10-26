@@ -22,6 +22,9 @@
     <!-- <link rel="stylesheet" href="~/css/font-awesome.min.css" asp-append-version="true" /> -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/responsive.css" asp-append-version="true" />
+    <!-- Comic font + pop art style for the "Special" menu tab -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" />
+    <link rel="stylesheet" href="~/css/special-tab.css" asp-append-version="true" />
     <style>
         /* Keep #menu / #about headings visible below the fixed header */
         html {
@@ -435,6 +438,10 @@
 
             <ul class="filters_menu">
 
+                <li class="special_tab" data-filter=".special">
+                    Special
+                </li>
+
                 <li class="active"
                     data-filter="*">
                     All
@@ -469,7 +476,12 @@
                     .ToArray()
             ).ToLowerInvariant();
 
-            if (normalizedCategory == "bakery")
+            if (normalizedCategory == "special" ||
+                normalizedCategory == "specials")
+            {
+                categoryClass = "special";
+            }
+            else if (normalizedCategory == "bakery")
             {
                 categoryClass = "bakery";
             }
@@ -883,7 +895,7 @@
         grid.style.minHeight = "";
 
         let tallest = 0;
-        ["*", ".bakery", ".burger", ".others"].forEach(function (filter) {
+        ["*", ".special", ".bakery", ".burger", ".others"].forEach(function (filter) {
             showCards(filter, false);
             tallest = Math.max(tallest, grid.offsetHeight);
         });

@@ -1,0 +1,47 @@
+/* "Special" menu tab: comic book / pop art explosion.
+   Grey burst with dark text; when selected the burst turns black and the text white.
+   Used on the home page menu and the full Menu page. */
+
+.food_section .filters_menu li.special_tab {
+    position: relative;
+    z-index: 0;
+    padding: 7px 34px;
+    margin: 0 22px 0 10px; /* extra space on the right so the burst doesn't touch "All" */
+    background: transparent;
+    color: #222;
+    font-family: 'Bangers', 'Impact', 'Arial Black', sans-serif;
+    font-size: 20px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    transform: rotate(-6deg);
+    transition: transform 0.2s ease;
+}
+
+/* The explosion shape, drawn behind the word */
+.food_section .filters_menu li.special_tab::before {
+    content: "";
+    position: absolute;
+    inset: -16px -6px;
+    z-index: -1;
+    background: #bdbdbd;
+    clip-path: polygon(50% 0%, 57.2% 13.7%, 67.6% 7.5%, 70.6% 19.2%, 85.4% 14.6%, 80.8% 29.4%, 92.5% 32.4%, 86.3% 42.8%, 100% 50%, 86.3% 57.2%, 92.5% 67.6%, 80.8% 70.6%, 85.4% 85.4%, 70.6% 80.8%, 67.6% 92.5%, 57.2% 86.3%, 50% 100%, 42.8% 86.3%, 32.4% 92.5%, 29.4% 80.8%, 14.6% 85.4%, 19.2% 70.6%, 7.5% 67.6%, 13.7% 57.2%, 0% 50%, 13.7% 42.8%, 7.5% 32.4%, 19.2% 29.4%, 14.6% 14.6%, 29.4% 19.2%, 32.4% 7.5%, 42.8% 13.7%);
+    transition: background-color 0.2s ease;
+}
+
+.food_section .filters_menu li.special_tab:hover {
+    transform: rotate(-6deg) scale(1.08);
+}
+
+.food_section .filters_menu li.special_tab:hover::before {
+    background: #a3a3a3;
+}
+
+/* Selected: black burst, white word (overrides the normal dark pill) */
+.food_section .filters_menu li.special_tab.active {
+    background: transparent;
+    color: #ffffff;
+}
+
+.food_section .filters_menu li.special_tab.active::before {
+    background: #000000;
+}

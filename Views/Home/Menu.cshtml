@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="~/css/bakeryscript.css" />
     <link rel="stylesheet" href="~/css/style.css" />
     <link rel="stylesheet" href="~/css/responsive.css" />
+    <!-- Comic font + pop art style for the "Special" menu tab -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" />
+    <link rel="stylesheet" href="~/css/special-tab.css" asp-append-version="true" />
 </head>
 
 <body>
@@ -108,6 +111,7 @@
             </div>
 
             <ul class="filters_menu">
+                <li class="special_tab" data-filter=".special">Special</li>
                 <li class="active" data-filter="*">All</li>
                 <li data-filter=".bakery">Bakery</li>
                 <li data-filter=".burger">Cold Grab N' Go</li>
@@ -122,7 +126,11 @@
                     {
                         string categoryClass = "";
 
-                        if (item.Category == "Bakery")
+                        if (item.Category == "Special")
+                        {
+                            categoryClass = "special";
+                        }
+                        else if (item.Category == "Bakery")
                         {
                             categoryClass = "bakery";
                         }
@@ -199,6 +207,7 @@ $(function () {
 
     const filters = {
         all: "*",
+        special: ".special",
         bakery: ".bakery",
         burger: ".burger",
         others: ".others"
